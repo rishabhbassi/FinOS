@@ -6,6 +6,7 @@ import { type ReactNode } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
+import TutorialOverlay from '@/components/onboarding/TutorialOverlay';
 
 export interface AuthGuardProps {
   children: ReactNode;
@@ -59,6 +60,9 @@ export default function AuthGuard({ children }: AuthGuardProps) {
           </div>
         </div>
       )}
+
+      {/* Onboarding tutorial for new users */}
+      {isAuthenticated && <TutorialOverlay />}
     </div>
   );
 }
