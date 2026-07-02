@@ -1,9 +1,11 @@
 // Finance OS - Auth Guard Component
 
+import { useEffect } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
 import { type ReactNode } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 export interface AuthGuardProps {
   children: ReactNode;
@@ -11,11 +13,27 @@ export interface AuthGuardProps {
 
 export default function AuthGuard({ children }: AuthGuardProps) {
   const location = useLocation();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, initialized, initialize } = useAuthStore();
+
+  // Initialize auth on mount
+  useEffect(() => {
+    if (!initialized) {
+      initialize();
+    }
+  }, [initialized, initialize]);
 
   // Skip the guard on auth-related pages (login, callback, etc.)
   if (location.pathname.startsWith('/auth/')) {
     return <>{children}</>;
+  }
+
+  // Show a loading state while auth is initializing
+  if (!initialized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--lagoon)]" />
+      </div>
+    );
   }
 
   return (

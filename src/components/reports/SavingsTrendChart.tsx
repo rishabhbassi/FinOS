@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { formatCurrency } from '@/lib/utils';
 import { motion } from 'motion/react';
-import { TrendingUp, AlertCircle, ArrowDown, ArrowUp } from 'lucide-react';
+import { TrendingUp, AlertCircle } from 'lucide-react';
 
 interface SavingsTrendChartProps {
   data: { month: string; savings: number; target: number }[];

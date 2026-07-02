@@ -125,7 +125,7 @@ export default function Sidebar() {
           </div>
           <button
             type="button"
-            onClick={logout}
+            onClick={() => { logout(); }}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
             title="Sign out"
           >

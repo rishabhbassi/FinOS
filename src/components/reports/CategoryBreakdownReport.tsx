@@ -159,8 +159,6 @@ export default function CategoryBreakdownReport({
                 position: 'right',
                 fontSize: 10,
                 fill: 'var(--sea-ink-soft)',
-                formatter: (v: number, entry: { payload: CategoryData }) =>
-                  `${entry.payload.percentage}%`,
               }}
             >
               {displayData.map((entry, index) => (

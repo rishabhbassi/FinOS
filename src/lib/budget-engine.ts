@@ -3,9 +3,10 @@
 // Everything revolves around remaining money, not money already spent.
 
 import type {
-  Transaction, BudgetRule, BudgetDay, BudgetWeek,
+  BudgetDay, BudgetWeek,
   BudgetMonth, DailyDecision, PlannerSummary
 } from '../types/app';
+import type { Transaction, BudgetRule } from '../types/database';
 import { getDaysLeftInMonth, getDaysInMonth, getDayName, getWeekNumber, toDateString, getStatus } from './utils';
 
 /**
@@ -17,7 +18,7 @@ export function calculateMonthlyBudget(
   totalIncome: number,
   fixedExpenses: number,
   transactions: Transaction[],
-  rules: BudgetRule[],
+  _rules: BudgetRule[],
   date: Date = new Date()
 ): BudgetMonth {
   const year = date.getFullYear();

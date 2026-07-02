@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router';
-import { Loader2, LogIn } from 'lucide-react';
+import { Loader2, LogIn, UserPlus } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth-store';
 
 export const Route = createFileRoute('/auth/login')({
@@ -10,10 +10,13 @@ export const Route = createFileRoute('/auth/login')({
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const login = useAuthStore((s) => s.login);
+  const signUp = useAuthStore((s) => s.signUp);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,13 +26,23 @@ function LoginPage() {
       setError('Please fill in all fields.');
       return;
     }
+    if (isSignUp && !name.trim()) {
+      setError('Please enter your name.');
+      return;
+    }
 
     setLoading(true);
     try {
-      await login(email, password);
+      if (isSignUp) {
+        await signUp(email, password, name);
+      } else {
+        await login(email, password);
+      }
       navigate({ to: '/' });
-    } catch {
-      setError('Login failed. Please try again.');
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Authentication failed. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -45,7 +58,7 @@ function LoginPage() {
           </div>
           <h1 className="demo-title">Finance OS</h1>
           <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
-            Sign in to your account
+            {isSignUp ? 'Create your account' : 'Sign in to your account'}
           </p>
         </div>
 
@@ -58,6 +71,27 @@ function LoginPage() {
           )}
 
           <div className="space-y-4">
+            {isSignUp && (
+              <div>
+                <label
+                  htmlFor="login-name"
+                  className="mb-1.5 block text-sm font-semibold text-[var(--sea-ink)]"
+                >
+                  Name
+                </label>
+                <input
+                  id="login-name"
+                  type="text"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="demo-input"
+                  autoComplete="name"
+                  required={isSignUp}
+                />
+              </div>
+            )}
+
             <div>
               <label
                 htmlFor="login-email"
@@ -91,7 +125,7 @@ function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="demo-input"
-                autoComplete="current-password"
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 required
               />
             </div>
@@ -105,7 +139,12 @@ function LoginPage() {
             {loading ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                Signing in...
+                {isSignUp ? 'Creating account...' : 'Signing in...'}
+              </>
+            ) : isSignUp ? (
+              <>
+                <UserPlus size={16} />
+                Create Account
               </>
             ) : (
               <>
@@ -115,9 +154,17 @@ function LoginPage() {
             )}
           </button>
 
-          <p className="mt-4 text-center text-xs text-[var(--sea-ink-soft)]">
-            Demo: any email and password will work
-          </p>
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
+              className="text-xs font-medium text-[var(--lagoon-deep)] hover:text-[var(--lagoon)] transition"
+            >
+              {isSignUp
+                ? 'Already have an account? Sign in'
+                : "Don't have an account? Create one"}
+            </button>
+          </div>
         </form>
 
         {/* Back link */}
@@ -133,3 +180,6 @@ function LoginPage() {
     </div>
   );
 }
+
+export default LoginPage;
+export { LoginPage };

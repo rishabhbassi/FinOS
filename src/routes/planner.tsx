@@ -52,7 +52,7 @@ function getDefaultVariableCategories(): PlannerVariableEntry[] {
 // ── Page Component ─────────────────────────────────────────────────────
 
 function PlannerPage() {
-  const { loading: budgetLoading, error: budgetError, refetch: refetchBudget } = useBudget();
+  const { loading: budgetLoading, error: budgetError, refresh: refetchBudget } = useBudget();
 
   // State for all planner entries
   const [incomeEntries, setIncomeEntries] = useState<PlannerIncomeEntry[]>(getDefaultIncome);

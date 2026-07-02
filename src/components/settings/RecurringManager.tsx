@@ -671,3 +671,5 @@ function ToggleRightIcon({ className }: { className?: string }) {
   );
 }
 
+export { RecurringManager };
+
