@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'motion/react';
 import {
   Target,
@@ -17,14 +17,12 @@ import {
 } from 'lucide-react';
 import { createFileRoute } from '@tanstack/react-router';
 import GoalsGrid from '@/components/goals/GoalsGrid';
-import { generateId } from '@/lib/utils';
+import { goalQueries } from '@/lib/supabase/queries';
 import type { Goal } from '@/types/database';
 
 export const Route = createFileRoute('/goals')({
   component: GoalsPage,
 });
-
-const GOALS: Goal[] = [];
 
 // Form defaults
 const FORM_DEFAULTS = {
@@ -65,22 +63,8 @@ const GOAL_COLORS = [
   '#6366f1',
 ];
 
-function formToGoal(form: GoalFormData, existingId?: string) {
-  return {
-    id: existingId ?? generateId(),
-    name: form.name.trim(),
-    target_amount: form.target_amount,
-    current_amount: form.current_amount,
-    deadline: form.deadline || null,
-    monthly_contribution: form.monthly_contribution || null,
-    icon: form.icon,
-    color: form.color,
-    is_completed: false,
-  };
-}
-
 function GoalsPage() {
-  const [goals, setGoals] = useState<Goal[]>(GOALS);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,12 +82,36 @@ function GoalsPage() {
     setTimeout(() => setToast(null), 2500);
   }, []);
 
+  // Fetch goals from Supabase on mount
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchGoals() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await goalQueries.list();
+        if (!cancelled) setGoals(data);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load goals');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    fetchGoals();
+    return () => { cancelled = true; };
+  }, []);
+
   const handleRetry = useCallback(async () => {
     setLoading(true);
     setError(null);
-    await new Promise((r) => setTimeout(r, 800));
-    setGoals(GOALS);
-    setLoading(false);
+    try {
+      const data = await goalQueries.list();
+      setGoals(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load goals');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const openAddModal = useCallback(() => {
@@ -136,7 +144,7 @@ function GoalsPage() {
   }, []);
 
   const handleSaveGoal = useCallback(
-    (e: React.FormEvent) => {
+    async (e: React.FormEvent) => {
       e.preventDefault();
       setFormError(null);
 
@@ -157,35 +165,57 @@ function GoalsPage() {
         return;
       }
 
-      if (editingGoalId) {
-        setGoals((prev) =>
-          prev.map((g) =>
-            g.id === editingGoalId
-              ? {
-                  ...g,
-                  ...formToGoal(form, editingGoalId),
-                }
-              : g,
-          ),
-        );
-        showToast('Goal updated');
-      } else {
-        const data = formToGoal(form) as Goal;
-        data.user_id = 'user-1';
-        data.created_at = new Date().toISOString();
-        data.updated_at = new Date().toISOString();
-        setGoals((prev) => [...prev, data]);
-        showToast('Goal created');
+      try {
+        if (editingGoalId) {
+          const updates = {
+            name: form.name.trim(),
+            target_amount: form.target_amount,
+            current_amount: form.current_amount,
+            deadline: form.deadline || null,
+            monthly_contribution: form.monthly_contribution || null,
+            icon: form.icon,
+            color: form.color,
+          };
+          await goalQueries.update(editingGoalId, updates);
+          setGoals((prev) =>
+            prev.map((g) =>
+              g.id === editingGoalId
+                ? { ...g, ...updates, updated_at: new Date().toISOString() }
+                : g,
+            ),
+          );
+          showToast('Goal updated');
+        } else {
+          const newGoal = await goalQueries.create({
+            name: form.name.trim(),
+            target_amount: form.target_amount,
+            current_amount: form.current_amount,
+            deadline: form.deadline || null,
+            monthly_contribution: form.monthly_contribution || null,
+            icon: form.icon,
+            color: form.color,
+            is_completed: false,
+          });
+          setGoals((prev) => [...prev, newGoal]);
+          showToast('Goal created');
+        }
+        closeModal();
+      } catch (err) {
+        setFormError(err instanceof Error ? err.message : 'Failed to save goal');
       }
-      closeModal();
     },
     [form, editingGoalId, closeModal, showToast],
   );
 
   const handleDeleteGoal = useCallback(
-    (id: string) => {
-      setGoals((prev) => prev.filter((g) => g.id !== id));
-      showToast('Goal deleted');
+    async (id: string) => {
+      try {
+        await goalQueries.delete(id);
+        setGoals((prev) => prev.filter((g) => g.id !== id));
+        showToast('Goal deleted');
+      } catch (err) {
+        showToast('Failed to delete goal');
+      }
     },
     [showToast],
   );

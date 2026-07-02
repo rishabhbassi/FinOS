@@ -1,118 +1,19 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { TrendingUp, RefreshCw } from 'lucide-react';
 import { createFileRoute } from '@tanstack/react-router';
 import PortfolioSummary from '@/components/investments/PortfolioSummary';
 import HoldingsList from '@/components/investments/HoldingsList';
+import { investmentQueries } from '@/lib/supabase/queries';
 import type { Investment } from '@/types/database';
 
 export const Route = createFileRoute('/investments')({
   component: InvestmentsPage,
 });
 
-const EMPTY_INVESTMENTS: Investment[] = [
-  {
-    id: 'inv-1',
-    user_id: 'user-1',
-    name: 'HDFC Midcap Opportunities',
-    type: 'mutual_fund',
-    amount_invested: 120000,
-    current_value: 142000,
-    sip_amount: 5000,
-    sip_day: 5,
-    provider: 'HDFC AMC',
-    notes: null,
-    created_at: '2025-01-15T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'inv-2',
-    user_id: 'user-1',
-    name: 'SBI Bluechip Fund',
-    type: 'mutual_fund',
-    amount_invested: 80000,
-    current_value: 76000,
-    sip_amount: 3000,
-    sip_day: 12,
-    provider: 'SBI AMC',
-    notes: null,
-    created_at: '2025-02-10T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'inv-3',
-    user_id: 'user-1',
-    name: 'Reliance Industries',
-    type: 'stock',
-    amount_invested: 45000,
-    current_value: 52300,
-    sip_amount: null,
-    sip_day: null,
-    provider: 'Zerodha',
-    notes: null,
-    created_at: '2025-03-05T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'inv-4',
-    user_id: 'user-1',
-    name: 'TCS',
-    type: 'stock',
-    amount_invested: 32000,
-    current_value: 29800,
-    sip_amount: null,
-    sip_day: null,
-    provider: 'Zerodha',
-    notes: null,
-    created_at: '2025-04-20T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'inv-5',
-    user_id: 'user-1',
-    name: 'ICICI FD',
-    type: 'fd',
-    amount_invested: 100000,
-    current_value: 108500,
-    sip_amount: null,
-    sip_day: null,
-    provider: 'ICICI Bank',
-    notes: '1 year FD at 8.5%',
-    created_at: '2025-05-01T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'inv-6',
-    user_id: 'user-1',
-    name: 'PPF Account',
-    type: 'ppf',
-    amount_invested: 60000,
-    current_value: 67200,
-    sip_amount: null,
-    sip_day: null,
-    provider: 'SBI',
-    notes: null,
-    created_at: '2025-06-15T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'inv-7',
-    user_id: 'user-1',
-    name: 'Digital Gold',
-    type: 'gold',
-    amount_invested: 25000,
-    current_value: 28700,
-    sip_amount: null,
-    sip_day: null,
-    provider: 'PhonePe',
-    notes: null,
-    created_at: '2025-07-10T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-];
 
 function InvestmentsPage() {
-  const [investments, setInvestments] = useState<Investment[]>(EMPTY_INVESTMENTS);
+  const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -122,12 +23,36 @@ function InvestmentsPage() {
     setTimeout(() => setToast(null), 2500);
   }, []);
 
+  // Fetch investments from Supabase on mount
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchInvestments() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await investmentQueries.list();
+        if (!cancelled) setInvestments(data);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load investments');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    fetchInvestments();
+    return () => { cancelled = true; };
+  }, []);
+
   const handleRetry = useCallback(async () => {
     setLoading(true);
     setError(null);
-    await new Promise((r) => setTimeout(r, 800));
-    setInvestments(EMPTY_INVESTMENTS);
-    setLoading(false);
+    try {
+      const data = await investmentQueries.list();
+      setInvestments(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load investments');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const handleEdit = useCallback(
@@ -138,9 +63,14 @@ function InvestmentsPage() {
   );
 
   const handleDelete = useCallback(
-    (id: string) => {
-      setInvestments((prev) => prev.filter((inv) => inv.id !== id));
-      showToast('Investment removed');
+    async (id: string) => {
+      try {
+        await investmentQueries.delete(id);
+        setInvestments((prev) => prev.filter((inv) => inv.id !== id));
+        showToast('Investment removed');
+      } catch (err) {
+        showToast('Failed to remove investment');
+      }
     },
     [showToast],
   );

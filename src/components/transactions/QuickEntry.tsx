@@ -27,8 +27,8 @@ import {
   Loader2,
 } from 'lucide-react';
 import type { Category } from '@/types/database';
+import { transactionQueries } from '@/lib/supabase/queries';
 import { getCategories } from '@/actions/categories';
-import { createTransaction } from '@/actions/transactions';
 import { formatCurrency, getTodayDateString, cn } from '@/lib/utils';
 
 // Keyword-to-category mapping for auto-categorization
@@ -218,14 +218,16 @@ export default function QuickEntry({ open, onClose, onSuccess }: QuickEntryProps
     setError(null);
 
     try {
-      await createTransaction({
+      await transactionQueries.create({
         amount: parsedAmount,
         type: 'expense',
         category_id: parsedCategoryId,
+        account_id: null,
         description: parsedDescription,
         merchant: '',
         date: getTodayDateString(),
         tags: [],
+        is_recurring: false,
       });
       onSuccess();
       onClose();

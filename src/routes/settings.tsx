@@ -11,8 +11,9 @@ import {
   AlertCircle,
   RefreshCw,
 } from 'lucide-react';
-import { cn, generateId } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { Account, Category, RecurringExpense } from '@/types/database';
+import { categoryQueries, accountQueries } from '@/lib/supabase/queries';
 
 import ProfileForm from '@/components/settings/ProfileForm';
 import CategoryManager from '@/components/settings/CategoryManager';
@@ -94,45 +95,71 @@ const TABS: Tab[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Sample data (seed state)
+// Loading skeletons
 // ---------------------------------------------------------------------------
-const INITIAL_CATEGORIES: Category[] = [
-  { id: 'cat-1', user_id: 'sample', name: 'Salary', type: 'income', icon: 'briefcase', color: '#22c55e', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-2', user_id: 'sample', name: 'Bonus', type: 'income', icon: 'circleDollarSign', color: '#3b82f6', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-3', user_id: 'sample', name: 'Freelancing', type: 'income', icon: 'laptop', color: '#a855f7', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-4', user_id: 'sample', name: 'Interest', type: 'income', icon: 'landmark', color: '#f59e0b', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-5', user_id: 'sample', name: 'Other Income', type: 'income', icon: 'wallet', color: '#14b8a6', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-6', user_id: 'sample', name: 'Food', type: 'expense', icon: 'utensils', color: '#f97316', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-7', user_id: 'sample', name: 'Rent', type: 'expense', icon: 'home', color: '#64748b', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-8', user_id: 'sample', name: 'Electricity', type: 'expense', icon: 'zap', color: '#f59e0b', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-9', user_id: 'sample', name: 'Internet', type: 'expense', icon: 'wifi', color: '#3b82f6', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-10', user_id: 'sample', name: 'Shopping', type: 'expense', icon: 'shoppingBag', color: '#ec4899', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-11', user_id: 'sample', name: 'Fuel', type: 'expense', icon: 'car', color: '#f97316', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-12', user_id: 'sample', name: 'Entertainment', type: 'expense', icon: 'film', color: '#a855f7', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-13', user_id: 'sample', name: 'Medical', type: 'expense', icon: 'heartPulse', color: '#ec4899', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-14', user_id: 'sample', name: 'Travel', type: 'expense', icon: 'plane', color: '#3b82f6', is_system: true, created_at: new Date().toISOString() },
-  { id: 'cat-15', user_id: 'sample', name: 'Education', type: 'expense', icon: 'bookOpen', color: '#14b8a6', is_system: true, created_at: new Date().toISOString() },
-];
+function CategoriesSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="fin-skeleton h-10 w-32 rounded-lg" />
+      <div className="space-y-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="fin-skeleton h-16 w-full rounded-xl" />
+        ))}
+      </div>
+      <div className="fin-skeleton h-5 w-40 rounded-lg" />
+      <div className="space-y-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="fin-skeleton h-16 w-full rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
-const INITIAL_ACCOUNTS: Account[] = [
-  { id: 'acc-1', user_id: 'sample', name: 'HDFC Savings', type: 'savings', balance: 84500, credit_limit: null, billing_date: null, due_date: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'acc-2', user_id: 'sample', name: 'ICICI Current', type: 'current', balance: 32000, credit_limit: null, billing_date: null, due_date: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'acc-3', user_id: 'sample', name: 'HDFC Credit Card', type: 'credit', balance: -12400, credit_limit: 150000, billing_date: 5, due_date: 25, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'acc-4', user_id: 'sample', name: 'Cash Wallet', type: 'cash', balance: 3200, credit_limit: null, billing_date: null, due_date: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'acc-5', user_id: 'sample', name: 'PhonePe', type: 'upi', balance: 1500, credit_limit: null, billing_date: null, due_date: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-];
+function AccountsSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="fin-skeleton h-10 w-32 rounded-lg" />
+      <div className="space-y-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="fin-skeleton h-16 w-full rounded-xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Error display
+// ---------------------------------------------------------------------------
+function SettingsError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-4 py-8 text-center">
+      <AlertCircle className="h-8 w-8 text-red-500" />
+      <p className="text-sm text-red-600">{message}</p>
+      <button type="button" onClick={onRetry} className="demo-button text-sm">
+        <RefreshCw className="h-4 w-4" /> Retry
+      </button>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Settings Page
 // ---------------------------------------------------------------------------
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
-  const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
-  const [accounts, setAccounts] = useState<Account[]>(INITIAL_ACCOUNTS);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+  const [accountsLoading, setAccountsLoading] = useState(false);
+  const [accountsError, setAccountsError] = useState<string | null>(null);
   const recurringExpenses = useRecurringStore((s) => s.expenses);
   const addRecurring = useRecurringStore((s) => s.addExpense);
   const updateRecurring = useRecurringStore((s) => s.updateExpense);
   const deleteRecurring = useRecurringStore((s) => s.deleteExpense);
+  const syncRecurring = useRecurringStore((s) => s.syncWithSupabase);
 
   const [profile, setProfile] = useState({
     name: 'Rishabh',
@@ -141,7 +168,6 @@ function SettingsPage() {
   });
 
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('auto');
-  const [isLoading, _setIsLoading] = useState(false);
 
   // ---- Sync theme to localStorage on mount ----
   useEffect(() => {
@@ -150,6 +176,39 @@ function SettingsPage() {
       setTheme(stored);
     }
   }, []);
+
+  // ---- Fetch data on mount ----
+  useEffect(() => {
+    fetchCategories();
+    fetchAccounts();
+    syncRecurring();
+  }, []);
+
+  async function fetchCategories() {
+    setCategoriesLoading(true);
+    setCategoriesError(null);
+    try {
+      const data = await categoryQueries.list();
+      setCategories(data);
+    } catch (err) {
+      setCategoriesError(err instanceof Error ? err.message : 'Failed to load categories');
+    } finally {
+      setCategoriesLoading(false);
+    }
+  }
+
+  async function fetchAccounts() {
+    setAccountsLoading(true);
+    setAccountsError(null);
+    try {
+      const data = await accountQueries.list();
+      setAccounts(data);
+    } catch (err) {
+      setAccountsError(err instanceof Error ? err.message : 'Failed to load accounts');
+    } finally {
+      setAccountsLoading(false);
+    }
+  }
 
   // ---- Profile handlers ----
   const handleProfileSave = useCallback(
@@ -161,94 +220,120 @@ function SettingsPage() {
 
   // ---- Category handlers ----
   const handleCategoryAdd = useCallback(
-    (cat: Omit<Category, 'id' | 'user_id' | 'created_at'>) => {
-      const newCat: Category = {
-        ...cat,
-        id: generateId(),
-        user_id: 'sample',
-        created_at: new Date().toISOString(),
-      };
-      setCategories((prev) => [...prev, newCat]);
+    async (cat: Omit<Category, 'id' | 'user_id' | 'created_at'>) => {
+      try {
+        const created = await categoryQueries.create({ ...cat, user_id: '' });
+        setCategories((prev) => [...prev, created]);
+      } catch (err) {
+        console.error('Failed to create category:', err);
+      }
     },
     [],
   );
 
   const handleCategoryUpdate = useCallback(
-    (id: string, updates: Partial<Category>) => {
-      setCategories((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, ...updates } : c)),
-      );
+    async (id: string, updates: Partial<Category>) => {
+      try {
+        await categoryQueries.update(id, updates);
+        setCategories((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+      } catch (err) {
+        console.error('Failed to update category:', err);
+      }
     },
     [],
   );
 
   const handleCategoryDelete = useCallback(
-    (id: string) => {
-      setCategories((prev) => prev.filter((c) => c.id !== id));
+    async (id: string) => {
+      try {
+        await categoryQueries.delete(id);
+        setCategories((prev) => prev.filter((c) => c.id !== id));
+      } catch (err) {
+        console.error('Failed to delete category:', err);
+      }
     },
     [],
   );
 
   // ---- Account handlers ----
   const handleAccountAdd = useCallback(
-    (acc: Omit<Account, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
-      const now = new Date().toISOString();
-      const newAcc: Account = {
-        ...acc,
-        id: generateId(),
-        user_id: 'sample',
-        created_at: now,
-        updated_at: now,
-      };
-      setAccounts((prev) => [...prev, newAcc]);
+    async (acc: Omit<Account, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+      try {
+        const created = await accountQueries.create(acc);
+        setAccounts((prev) => [...prev, created]);
+      } catch (err) {
+        console.error('Failed to create account:', err);
+      }
     },
     [],
   );
 
   const handleAccountUpdate = useCallback(
-    (id: string, updates: Partial<Account>) => {
-      setAccounts((prev) =>
-        prev.map((a) =>
-          a.id === id
-            ? { ...a, ...updates, updated_at: new Date().toISOString() }
-            : a,
-        ),
-      );
+    async (id: string, updates: Partial<Account>) => {
+      try {
+        await accountQueries.update(id, updates);
+        setAccounts((prev) =>
+          prev.map((a) =>
+            a.id === id
+              ? { ...a, ...updates, updated_at: new Date().toISOString() }
+              : a,
+          ),
+        );
+      } catch (err) {
+        console.error('Failed to update account:', err);
+      }
     },
     [],
   );
 
   const handleAccountDelete = useCallback(
-    (id: string) => {
-      setAccounts((prev) => prev.filter((a) => a.id !== id));
+    async (id: string) => {
+      try {
+        await accountQueries.delete(id);
+        setAccounts((prev) => prev.filter((a) => a.id !== id));
+      } catch (err) {
+        console.error('Failed to delete account:', err);
+      }
     },
     [],
   );
 
   // ---- Recurring handlers ----
   const handleRecurringAdd = useCallback(
-    (exp: Omit<RecurringExpense, 'id' | 'user_id' | 'created_at'>) => {
-      const newExp: RecurringExpense = {
-        ...exp,
-        id: generateId(),
-        user_id: 'sample',
-        created_at: new Date().toISOString(),
-      };
-      addRecurring(newExp);
+    async (exp: Omit<RecurringExpense, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+      try {
+        await addRecurring({
+          ...exp,
+          id: 'temp',
+          user_id: 'temp',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      } catch (err) {
+        console.error('Failed to create recurring expense:', err);
+      }
     },
     [addRecurring],
   );
 
   const handleRecurringUpdate = useCallback(
-    (id: string, updates: Partial<RecurringExpense>) => {
-      updateRecurring(id, { ...updates, updated_at: new Date().toISOString() });
+    async (id: string, updates: Partial<RecurringExpense>) => {
+      try {
+        await updateRecurring(id, updates);
+      } catch (err) {
+        console.error('Failed to update recurring expense:', err);
+      }
     },
     [updateRecurring],
   );
 
   const handleRecurringDelete = useCallback(
-    (id: string) => {
-      deleteRecurring(id);
+    async (id: string) => {
+      try {
+        await deleteRecurring(id);
+      } catch (err) {
+        console.error('Failed to delete recurring expense:', err);
+      }
     },
     [deleteRecurring],
   );
@@ -280,24 +365,36 @@ function SettingsPage() {
       case 'categories':
         return (
           <div className="demo-panel">
-            <CategoryManager
-              categories={categories}
-              onAdd={handleCategoryAdd}
-              onUpdate={handleCategoryUpdate}
-              onDelete={handleCategoryDelete}
-            />
+            {categoriesLoading ? (
+              <CategoriesSkeleton />
+            ) : categoriesError ? (
+              <SettingsError message={categoriesError} onRetry={fetchCategories} />
+            ) : (
+              <CategoryManager
+                categories={categories}
+                onAdd={handleCategoryAdd}
+                onUpdate={handleCategoryUpdate}
+                onDelete={handleCategoryDelete}
+              />
+            )}
           </div>
         );
 
       case 'accounts':
         return (
           <div className="demo-panel">
-            <AccountManager
-              accounts={accounts}
-              onAdd={handleAccountAdd}
-              onUpdate={handleAccountUpdate}
-              onDelete={handleAccountDelete}
-            />
+            {accountsLoading ? (
+              <AccountsSkeleton />
+            ) : accountsError ? (
+              <SettingsError message={accountsError} onRetry={fetchAccounts} />
+            ) : (
+              <AccountManager
+                accounts={accounts}
+                onAdd={handleAccountAdd}
+                onUpdate={handleAccountUpdate}
+                onDelete={handleAccountDelete}
+              />
+            )}
           </div>
         );
 
@@ -323,30 +420,6 @@ function SettingsPage() {
       default:
         return null;
     }
-  }
-
-  // ---- Loading state ----
-  if (isLoading) {
-    return (
-      <div className="demo-page">
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="fin-skeleton h-9 w-9 rounded-lg" />
-            <div className="fin-skeleton h-8 w-40 rounded-lg" />
-          </div>
-          <div className="flex gap-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="fin-skeleton h-10 w-28 rounded-lg" />
-            ))}
-          </div>
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="fin-skeleton h-16 w-full rounded-xl" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
   }
 
   // ---- Main render ----

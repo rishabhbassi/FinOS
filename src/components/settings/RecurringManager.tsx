@@ -70,9 +70,9 @@ const ADD_FORM_DEFAULTS: AddFormState = {
 // ---------------------------------------------------------------------------
 interface RecurringManagerProps {
   expenses: RecurringExpense[];
-  onAdd: (expense: Omit<RecurringExpense, 'id' | 'user_id' | 'created_at'>) => void;
-  onUpdate: (id: string, expense: Partial<RecurringExpense>) => void;
-  onDelete: (id: string) => void;
+  onAdd: (expense: Omit<RecurringExpense, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onUpdate: (id: string, expense: Partial<RecurringExpense>) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
@@ -171,7 +171,7 @@ export default function RecurringManager({
   // ---- Form to payload ----
   function formToPayload(
     form: AddFormState,
-  ): Omit<RecurringExpense, 'id' | 'user_id' | 'created_at'> {
+  ): Omit<RecurringExpense, 'id' | 'user_id' | 'created_at' | 'updated_at'> {
     return {
       name: form.name.trim(),
       category_id: form.category,
@@ -181,7 +181,6 @@ export default function RecurringManager({
       day_of_week: form.frequency === 'weekly' ? parseInt(form.day_of_month, 10) || 1 : null,
       account_id: null,
       is_active: form.is_active,
-      updated_at: new Date().toISOString(),
     };
   }
 
