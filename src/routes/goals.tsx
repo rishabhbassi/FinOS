@@ -24,64 +24,7 @@ export const Route = createFileRoute('/goals')({
   component: GoalsPage,
 });
 
-const MOCK_GOALS: Goal[] = [
-  {
-    id: 'goal-1',
-    user_id: 'user-1',
-    name: 'Emergency Fund',
-    target_amount: 300000,
-    current_amount: 125000,
-    deadline: '2026-12-01',
-    monthly_contribution: 15000,
-    icon: 'PiggyBank',
-    color: '#22c55e',
-    is_completed: false,
-    created_at: '2025-01-10T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'goal-2',
-    user_id: 'user-1',
-    name: 'New Car',
-    target_amount: 800000,
-    current_amount: 200000,
-    deadline: '2027-06-01',
-    monthly_contribution: 25000,
-    icon: 'Car',
-    color: '#3b82f6',
-    is_completed: false,
-    created_at: '2025-03-15T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'goal-3',
-    user_id: 'user-1',
-    name: 'Europe Trip',
-    target_amount: 500000,
-    current_amount: 150000,
-    deadline: '2027-12-01',
-    monthly_contribution: 10000,
-    icon: 'Plane',
-    color: '#f97316',
-    is_completed: false,
-    created_at: '2025-05-20T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-  {
-    id: 'goal-4',
-    user_id: 'user-1',
-    name: 'Dream Home Down Payment',
-    target_amount: 2000000,
-    current_amount: 400000,
-    deadline: '2029-12-01',
-    monthly_contribution: 35000,
-    icon: 'Home',
-    color: '#a855f7',
-    is_completed: false,
-    created_at: '2025-06-01T00:00:00Z',
-    updated_at: '2026-06-28T00:00:00Z',
-  },
-];
+const GOALS: Goal[] = [];
 
 // Form defaults
 const FORM_DEFAULTS = {
@@ -137,7 +80,7 @@ function formToGoal(form: GoalFormData, existingId?: string) {
 }
 
 function GoalsPage() {
-  const [goals, setGoals] = useState<Goal[]>(MOCK_GOALS);
+  const [goals, setGoals] = useState<Goal[]>(GOALS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -159,7 +102,7 @@ function GoalsPage() {
     setLoading(true);
     setError(null);
     await new Promise((r) => setTimeout(r, 800));
-    setGoals(MOCK_GOALS);
+    setGoals(GOALS);
     setLoading(false);
   }, []);
 

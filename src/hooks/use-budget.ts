@@ -2,99 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type { DailyDecision, BudgetMonth } from '@/types/app';
 import type { Transaction } from '@/types/database';
 import { calculateDailyDecision, calculateMonthlyBudget } from '@/lib/budget-engine';
-import { generateId, toDateString } from '@/lib/utils';
-
-interface CategoryConfig {
-  id: string;
-  name: string;
-  minAmount: number;
-  maxAmount: number;
-  transactionCount: number;
-}
-
-const CATEGORIES: CategoryConfig[] = [
-  { id: 'food', name: 'Food', minAmount: 100, maxAmount: 800, transactionCount: 10 },
-  { id: 'groceries', name: 'Groceries', minAmount: 300, maxAmount: 1500, transactionCount: 5 },
-  { id: 'fuel', name: 'Fuel', minAmount: 500, maxAmount: 1200, transactionCount: 4 },
-  { id: 'shopping', name: 'Shopping', minAmount: 300, maxAmount: 1500, transactionCount: 4 },
-  { id: 'entertainment', name: 'Entertainment', minAmount: 200, maxAmount: 1000, transactionCount: 3 },
-  { id: 'medical', name: 'Medical', minAmount: 200, maxAmount: 1000, transactionCount: 2 },
-  { id: 'travel', name: 'Travel', minAmount: 300, maxAmount: 1500, transactionCount: 3 },
-];
-
-const MERCHANTS: Record<string, string[]> = {
-  Food: ['Zomato', 'Swiggy', 'Dominos', 'Local Cafe', 'Darshini', 'Restaurant'],
-  Groceries: ['BigBasket', 'Zepto', 'Blinkit', 'Reliance Fresh', 'Local Mart'],
-  Fuel: ['Indian Oil', 'BPCL', 'HP Shell', 'IOCL Pump'],
-  Shopping: ['Amazon', 'Flipkart', 'Myntra', 'Ajio', 'Local Store'],
-  Entertainment: ['Netflix', 'Amazon Prime', 'BookMyShow', 'Spotify', 'PVR'],
-  Medical: ['Apollo Pharmacy', 'MedPlus', 'Local Pharmacy', 'Practo'],
-  Travel: ['Uber', 'Ola', 'IRCTC', 'RedBus', 'MakeMyTrip'],
-};
-
-function randomAmount(min: number, max: number): number {
-  return Math.round(min + Math.random() * (max - min));
-}
-
-function randomDate(year: number, month: number): string {
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const day = Math.floor(Math.random() * daysInMonth) + 1;
-  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
-
-function generateSampleTransactions(): Transaction[] {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const timestamp = new Date().toISOString();
-  const transactions: Transaction[] = [];
-
-  // Income: Salary 59000
-  transactions.push({
-    id: generateId(),
-    user_id: 'demo-user',
-    account_id: null,
-    category_id: 'salary',
-    amount: 59000,
-    description: 'Monthly Salary',
-    merchant: 'Employer Corp',
-    date: `${year}-${pad(month + 1)}-01`,
-    type: 'income',
-    is_recurring: true,
-    tags: ['salary'],
-    created_at: timestamp,
-    updated_at: timestamp,
-  });
-
-  // Variable expense transactions (fixed expenses handled via parameters)
-  for (const cat of CATEGORIES) {
-    const merchants = MERCHANTS[cat.name] ?? ['Store'];
-    for (let i = 0; i < cat.transactionCount; i++) {
-      const amount = randomAmount(cat.minAmount, cat.maxAmount);
-      const d = randomDate(year, month);
-      const merchant = merchants[Math.floor(Math.random() * merchants.length)];
-
-      transactions.push({
-        id: generateId(),
-        user_id: 'demo-user',
-        account_id: null,
-        category_id: cat.id,
-        amount: -amount,
-        description: `${cat.name} at ${merchant}`,
-        merchant,
-        date: d,
-        type: 'expense',
-        is_recurring: false,
-        tags: [],
-        created_at: timestamp,
-        updated_at: timestamp,
-      });
-    }
-  }
-
-  return transactions;
-}
+import { toDateString } from '@/lib/utils';
 
 export function useBudget(): {
   dailyDecision: DailyDecision | null;
@@ -125,13 +33,12 @@ export function useBudget(): {
       setError(null);
 
       const now = new Date();
-      // Income: Salary 59000
-      const totalIncome = 59000;
-      // Fixed expenses: Rent 21000 + Electricity 1200 + Internet 1000 + SIP 7000
-      const fixedExpenses = 21000 + 1200 + 1000 + 7000;
+      // Empty data — user will add their own income and expenses
+      const totalIncome = 0;
+      const fixedExpenses = 0;
 
-      // Generate random sample transactions for the current month
-      const transactions = generateSampleTransactions();
+      // No transactions yet — real data loads from Supabase once integrated
+      const transactions: Transaction[] = [];
 
       // Compute daily decision from budget engine
       const decision = calculateDailyDecision(

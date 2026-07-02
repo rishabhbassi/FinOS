@@ -17,146 +17,6 @@ export const Route = createFileRoute('/budget')({
   component: BudgetPage,
 });
 
-// ── Demo data generators ────────────────────────────────────────
-
-function generateDemoTransactions(): Transaction[] {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const dateStr = (d: number) => `${year}-${pad(month + 1)}-${pad(d)}`;
-
-  const txns: Transaction[] = [];
-
-  const makeTx = (
-    day: number,
-    catId: string,
-    amount: number,
-    desc: string,
-    merchant: string,
-  ) => {
-    txns.push({
-      id: `demo-tx-${txns.length + 1}`,
-      user_id: 'demo',
-      account_id: null,
-      category_id: catId,
-      amount,
-      description: desc,
-      merchant,
-      date: dateStr(day),
-      type: 'expense' as const,
-      is_recurring: false,
-      tags: [],
-      created_at: dateStr(day),
-      updated_at: dateStr(day),
-    });
-  };
-
-  // Day 1
-  makeTx(1, 'food', 450, 'Grocery run', 'FreshMart');
-  makeTx(1, 'food', 320, 'Lunch delivery', 'Zomato');
-  makeTx(1, 'transport', 150, 'Metro recharge', 'Delhi Metro');
-
-  // Day 2
-  makeTx(2, 'food', 280, 'Breakfast and coffee', 'Starbucks');
-  makeTx(2, 'shopping', 2200, 'Running shoes', 'Nike');
-
-  // Day 3
-  makeTx(3, 'transport', 80, 'Auto ride', 'Auto');
-  makeTx(3, 'food', 560, 'Dinner out', 'The Table');
-  makeTx(3, 'entertainment', 900, 'Movie tickets', 'PVR');
-
-  // Day 4
-  makeTx(4, 'food', 190, 'Snacks & tea', 'Local Cafe');
-
-  // Day 5
-  makeTx(5, 'transport', 1200, 'Fuel refill', 'Indian Oil');
-  makeTx(5, 'food', 450, 'Groceries', 'Big Basket');
-  makeTx(5, 'utilities', 5000, 'Electricity bill', 'BSES');
-
-  // Day 6
-  makeTx(6, 'entertainment', 600, 'Netflix sub', 'Netflix');
-  makeTx(6, 'food', 340, 'Office lunch', 'Office Canteen');
-
-  // Day 7
-  makeTx(7, 'food', 220, 'Sunday brunch', 'Cafe 8');
-  makeTx(7, 'entertainment', 1500, 'Concert tickets', 'BookMyShow');
-  makeTx(7, 'transport', 280, 'Cab ride', 'Uber');
-
-  // Include a transaction for today if it falls after day 7
-  const today = now.getDate();
-  if (today > 7 && today <= 28) {
-    makeTx(today, 'food', 310, 'Quick bite', 'Subway');
-  }
-
-  return txns;
-}
-
-function generateDemoRules(): BudgetRule[] {
-  return [
-    {
-      id: 'rule-food',
-      user_id: 'demo',
-      category_id: 'food',
-      name: 'Food & Dining',
-      type: 'daily',
-      amount: 600,
-      day_multiplier: 1,
-      is_active: true,
-      created_at: '',
-      updated_at: '',
-    },
-    {
-      id: 'rule-transport',
-      user_id: 'demo',
-      category_id: 'transport',
-      name: 'Transport',
-      type: 'daily',
-      amount: 200,
-      day_multiplier: 1,
-      is_active: true,
-      created_at: '',
-      updated_at: '',
-    },
-    {
-      id: 'rule-shopping',
-      user_id: 'demo',
-      category_id: 'shopping',
-      name: 'Shopping',
-      type: 'monthly',
-      amount: 8000,
-      day_multiplier: 1,
-      is_active: true,
-      created_at: '',
-      updated_at: '',
-    },
-    {
-      id: 'rule-entertainment',
-      user_id: 'demo',
-      category_id: 'entertainment',
-      name: 'Entertainment',
-      type: 'weekly',
-      amount: 1500,
-      day_multiplier: 1,
-      is_active: true,
-      created_at: '',
-      updated_at: '',
-    },
-    {
-      id: 'rule-utilities',
-      user_id: 'demo',
-      category_id: 'utilities',
-      name: 'Utilities',
-      type: 'monthly',
-      amount: 5000,
-      day_multiplier: 1,
-      is_active: true,
-      created_at: '',
-      updated_at: '',
-    },
-  ];
-}
-
 // ── Page Component ──────────────────────────────────────────────
 
 function BudgetPage() {
@@ -168,10 +28,10 @@ function BudgetPage() {
   // down to child components which render their own loading/error/empty states.
   const budgetData = useMemo(() => {
     const today = new Date();
-    const income = 150_000;
-    const fixedExpenses = 45_000;
-    const rules = generateDemoRules();
-    const transactions = generateDemoTransactions();
+    const income = 0;
+    const fixedExpenses = 0;
+    const rules: BudgetRule[] = [];
+    const transactions: Transaction[] = [];
 
     const monthData = calculateMonthlyBudget(income, fixedExpenses, transactions, rules, today);
     const categoryData = calculateBudgetUtilization(rules, transactions, today);

@@ -45,7 +45,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       {!isAuthenticated && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
           <div className="demo-panel max-w-sm text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--lagoon)] to-[var(--palm)] text-xl font-bold text-white">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--lagoon-deep)] text-xl font-bold text-white">
               F
             </div>
             <h2 className="demo-title mb-1">Finance OS</h2>

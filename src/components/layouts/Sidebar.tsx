@@ -58,7 +58,7 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col border-r border-[var(--line)] bg-[var(--bg-base)] lg:flex">
       {/* Logo */}
       <div className="flex h-16 items-center gap-2.5 border-b border-[var(--line)] px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--lagoon)] to-[var(--palm)] text-xs font-bold text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--lagoon-deep)] text-xs font-bold text-white">
           F
         </div>
         <span className="text-lg font-bold text-[var(--sea-ink)]">Finance OS</span>
@@ -112,7 +112,7 @@ export default function Sidebar() {
 
         {/* User account */}
         <div className="flex items-center gap-3 rounded-xl px-3 py-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[var(--lagoon)] to-[var(--palm)] text-xs font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--lagoon-deep)] text-xs font-bold text-white">
             {user?.name?.charAt(0) ?? 'U'}
           </div>
           <div className="min-w-0 flex-1">

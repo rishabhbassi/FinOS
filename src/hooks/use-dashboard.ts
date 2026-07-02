@@ -6,140 +6,7 @@ import {
   calculateMonthlyBudget,
   calculateCategoryBreakdown,
 } from '@/lib/budget-engine';
-import { generateId, toDateString, getDaysInMonth } from '@/lib/utils';
-
-// Categories with colors for the dashboard breakdown
-const CATEGORIES: { id: string; name: string; color: string }[] = [
-  { id: 'food', name: 'Food', color: '#f97316' },
-  { id: 'groceries', name: 'Groceries', color: '#22c55e' },
-  { id: 'fuel', name: 'Fuel', color: '#3b82f6' },
-  { id: 'shopping', name: 'Shopping', color: '#a855f7' },
-  { id: 'entertainment', name: 'Entertainment', color: '#ec4899' },
-  { id: 'medical', name: 'Medical', color: '#14b8a6' },
-  { id: 'travel', name: 'Travel', color: '#f59e0b' },
-  { id: 'rent', name: 'Rent', color: '#64748b' },
-  { id: 'electricity', name: 'Electricity', color: '#eab308' },
-  { id: 'internet', name: 'Internet', color: '#06b6d4' },
-  { id: 'sip', name: 'SIP', color: '#8b5cf6' },
-];
-
-const MERCHANTS: Record<string, string[]> = {
-  Food: ['Zomato', 'Swiggy', 'Dominos', 'Local Cafe', 'Darshini', 'Restaurant'],
-  Groceries: ['BigBasket', 'Zepto', 'Blinkit', 'Reliance Fresh', 'Local Mart'],
-  Fuel: ['Indian Oil', 'BPCL', 'HP Shell', 'IOCL Pump'],
-  Shopping: ['Amazon', 'Flipkart', 'Myntra', 'Ajio', 'Local Store'],
-  Entertainment: ['Netflix', 'Amazon Prime', 'BookMyShow', 'Spotify', 'PVR'],
-  Medical: ['Apollo Pharmacy', 'MedPlus', 'Local Pharmacy', 'Practo'],
-  Travel: ['Uber', 'Ola', 'IRCTC', 'RedBus', 'MakeMyTrip'],
-};
-
-interface GeneratedTransactions {
-  allTransactions: Transaction[];
-  variableTransactions: Transaction[];
-}
-
-/**
- * Generate a comprehensive set of mock transactions for the dashboard.
- * Returns both the full transaction list (including fixed expenses)
- * and a filtered list containing only variable expenses.
- */
-function generateDashboardData(date: Date): GeneratedTransactions {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const timestamp = new Date().toISOString();
-  const all: Transaction[] = [];
-  const variable: Transaction[] = [];
-
-  // Income: Salary 59000 on day 1
-  all.push({
-    id: generateId(),
-    user_id: 'demo-user',
-    account_id: null,
-    category_id: 'salary',
-    amount: 59000,
-    description: 'Monthly Salary',
-    merchant: 'Employer Corp',
-    date: `${year}-${pad(month + 1)}-01`,
-    type: 'income',
-    is_recurring: true,
-    tags: ['salary'],
-    created_at: timestamp,
-    updated_at: timestamp,
-  });
-
-  // Fixed expense transactions (included in all, excluded from variable)
-  const fixedEntries: { catId: string; name: string; amount: number; day: number }[] = [
-    { catId: 'rent', name: 'Rent', amount: 21000, day: 5 },
-    { catId: 'electricity', name: 'Electricity', amount: 1200, day: 10 },
-    { catId: 'internet', name: 'Internet', amount: 1000, day: 7 },
-    { catId: 'sip', name: 'SIP', amount: 7000, day: 3 },
-  ];
-
-  for (const fe of fixedEntries) {
-    all.push({
-      id: generateId(),
-      user_id: 'demo-user',
-      account_id: null,
-      category_id: fe.catId,
-      amount: -fe.amount,
-      description: fe.name,
-      merchant: fe.name,
-      date: `${year}-${pad(month + 1)}-${pad(fe.day)}`,
-      type: 'expense',
-      is_recurring: true,
-      tags: ['fixed'],
-      created_at: timestamp,
-      updated_at: timestamp,
-    });
-  }
-
-  // Variable expense transactions (included in both)
-  const variableCategories: { id: string; name: string; min: number; max: number; count: number }[] = [
-    { id: 'food', name: 'Food', min: 100, max: 800, count: 10 },
-    { id: 'groceries', name: 'Groceries', min: 400, max: 1500, count: 5 },
-    { id: 'fuel', name: 'Fuel', min: 500, max: 1200, count: 4 },
-    { id: 'shopping', name: 'Shopping', min: 300, max: 1500, count: 4 },
-    { id: 'entertainment', name: 'Entertainment', min: 200, max: 1000, count: 3 },
-    { id: 'medical', name: 'Medical', min: 200, max: 1000, count: 2 },
-    { id: 'travel', name: 'Travel', min: 300, max: 1500, count: 3 },
-  ];
-
-  for (const vc of variableCategories) {
-    const merchants = MERCHANTS[vc.name] ?? ['Store'];
-    for (let i = 0; i < vc.count; i++) {
-      const amount = vc.min + Math.floor(Math.random() * (vc.max - vc.min));
-      const day = Math.floor(Math.random() * 28) + 1;
-      const d = `${year}-${pad(month + 1)}-${pad(day)}`;
-      const merchant = merchants[Math.floor(Math.random() * merchants.length)];
-
-      const tx: Transaction = {
-        id: generateId(),
-        user_id: 'demo-user',
-        account_id: null,
-        category_id: vc.id,
-        amount: -amount,
-        description: `${vc.name} at ${merchant}`,
-        merchant,
-        date: d,
-        type: 'expense',
-        is_recurring: false,
-        tags: [],
-        created_at: timestamp,
-        updated_at: timestamp,
-      };
-
-      all.push(tx);
-      variable.push(tx);
-    }
-  }
-
-  // Sort by date descending (most recent first) for recent transactions
-  all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  variable.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  return { allTransactions: all, variableTransactions: variable };
-}
+import { toDateString, getDaysInMonth } from '@/lib/utils';
 
 /**
  * Compute the month overview including total income, expenses, savings,
@@ -192,12 +59,12 @@ export function useDashboard(): {
       setError(null);
 
       const now = new Date();
-      const totalIncome = 59000;
-      const fixedExpenses = 21000 + 1200 + 1000 + 7000;
+      const totalIncome = 0;
+      const fixedExpenses = 0;
 
-      // Generate comprehensive mock data
-      const { allTransactions, variableTransactions } =
-        generateDashboardData(now);
+      // Empty data — real Supabase data will be loaded once integrated
+      const allTransactions: Transaction[] = [];
+      const variableTransactions: Transaction[] = [];
 
       // Daily decision uses variable-only transactions (fixed handled via param)
       const dailyDecision = calculateDailyDecision(
@@ -210,7 +77,7 @@ export function useDashboard(): {
       // Category breakdown uses all transactions for the full financial picture
       const categoryBreakdown = calculateCategoryBreakdown(
         allTransactions,
-        CATEGORIES,
+        [],
       );
 
       // Compute monthly budget to derive week overview and timeline

@@ -53,7 +53,7 @@ function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Branding */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--lagoon)] to-[var(--palm)] text-xl font-bold text-white shadow-lg">
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--lagoon-deep)] text-xl font-bold text-white shadow-lg">
             F
           </div>
           <h1 className="demo-title">Finance OS</h1>

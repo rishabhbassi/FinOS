@@ -10,7 +10,7 @@ export const Route = createFileRoute('/investments')({
   component: InvestmentsPage,
 });
 
-const MOCK_INVESTMENTS: Investment[] = [
+const EMPTY_INVESTMENTS: Investment[] = [
   {
     id: 'inv-1',
     user_id: 'user-1',
@@ -112,7 +112,7 @@ const MOCK_INVESTMENTS: Investment[] = [
 ];
 
 function InvestmentsPage() {
-  const [investments, setInvestments] = useState<Investment[]>(MOCK_INVESTMENTS);
+  const [investments, setInvestments] = useState<Investment[]>(EMPTY_INVESTMENTS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -126,7 +126,7 @@ function InvestmentsPage() {
     setLoading(true);
     setError(null);
     await new Promise((r) => setTimeout(r, 800));
-    setInvestments(MOCK_INVESTMENTS);
+    setInvestments(EMPTY_INVESTMENTS);
     setLoading(false);
   }, []);
 
