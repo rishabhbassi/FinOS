@@ -6,7 +6,7 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "vite dev --port 3000",
+    "dev": "vite dev",
     "generate-routes": "tsr generate",
     "build": "vite build",
     "preview": "vite preview",
@@ -28,6 +28,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",
     "motion": "^12.42.2",
+    "nitro": "^3.0.260610-beta",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.80.0",
