@@ -18,6 +18,7 @@ import ProfileForm from '@/components/settings/ProfileForm';
 import CategoryManager from '@/components/settings/CategoryManager';
 import AccountManager from '@/components/settings/AccountManager';
 import RecurringManager from '@/components/settings/RecurringManager';
+import { useRecurringStore } from '@/stores/recurring-store';
 import ThemeSettings from '@/components/settings/ThemeSettings';
 
 // ---------------------------------------------------------------------------
@@ -121,15 +122,6 @@ const INITIAL_ACCOUNTS: Account[] = [
   { id: 'acc-5', user_id: 'sample', name: 'PhonePe', type: 'upi', balance: 1500, credit_limit: null, billing_date: null, due_date: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
 ];
 
-const INITIAL_RECURRING: RecurringExpense[] = [
-  { id: 'rec-1', user_id: 'sample', category_id: 'Rent', account_id: null, name: 'Rent', amount: 21000, frequency: 'monthly', day_of_month: 1, day_of_week: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'rec-2', user_id: 'sample', category_id: 'Electricity', account_id: null, name: 'Electricity Bill', amount: 1200, frequency: 'monthly', day_of_month: 5, day_of_week: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'rec-3', user_id: 'sample', category_id: 'Internet', account_id: null, name: 'Internet Plan', amount: 1000, frequency: 'monthly', day_of_month: 10, day_of_week: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'rec-4', user_id: 'sample', category_id: 'SIP', account_id: null, name: 'SIP Investment', amount: 7000, frequency: 'monthly', day_of_month: 3, day_of_week: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'rec-5', user_id: 'sample', category_id: 'Entertainment', account_id: null, name: 'Netflix', amount: 500, frequency: 'monthly', day_of_month: 15, day_of_week: null, is_active: true, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-  { id: 'rec-6', user_id: 'sample', category_id: 'Misc', account_id: null, name: 'Gym Membership', amount: 2000, frequency: 'monthly', day_of_month: 1, day_of_week: null, is_active: false, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-];
-
 // ---------------------------------------------------------------------------
 // Settings Page
 // ---------------------------------------------------------------------------
@@ -137,7 +129,10 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const [categories, setCategories] = useState<Category[]>(INITIAL_CATEGORIES);
   const [accounts, setAccounts] = useState<Account[]>(INITIAL_ACCOUNTS);
-  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>(INITIAL_RECURRING);
+  const recurringExpenses = useRecurringStore((s) => s.expenses);
+  const addRecurring = useRecurringStore((s) => s.addExpense);
+  const updateRecurring = useRecurringStore((s) => s.updateExpense);
+  const deleteRecurring = useRecurringStore((s) => s.deleteExpense);
 
   const [profile, setProfile] = useState({
     name: 'Rishabh',
@@ -239,29 +234,23 @@ function SettingsPage() {
         user_id: 'sample',
         created_at: new Date().toISOString(),
       };
-      setRecurringExpenses((prev) => [...prev, newExp]);
+      addRecurring(newExp);
     },
-    [],
+    [addRecurring],
   );
 
   const handleRecurringUpdate = useCallback(
     (id: string, updates: Partial<RecurringExpense>) => {
-      setRecurringExpenses((prev) =>
-        prev.map((e) =>
-          e.id === id
-            ? { ...e, ...updates, updated_at: new Date().toISOString() }
-            : e,
-        ),
-      );
+      updateRecurring(id, { ...updates, updated_at: new Date().toISOString() });
     },
-    [],
+    [updateRecurring],
   );
 
   const handleRecurringDelete = useCallback(
     (id: string) => {
-      setRecurringExpenses((prev) => prev.filter((e) => e.id !== id));
+      deleteRecurring(id);
     },
-    [],
+    [deleteRecurring],
   );
 
   // ---- Theme handler ----

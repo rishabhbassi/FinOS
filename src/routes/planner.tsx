@@ -15,18 +15,7 @@ import type {
   PlannerVariableEntry,
   PlannerSummary,
 } from '@/types/app';
-import type { RecurringExpense } from '@/types/database';
-
-// ---------------------------------------------------------------------------
-// Default recurring expenses (same RecurringExpense type used by
-// RecurringManager in the Settings page)
-// ---------------------------------------------------------------------------
-const DEFAULT_RECURRING_EXPENSES: RecurringExpense[] = [
-  { id: 'rec-1', user_id: '', category_id: 'Rent', account_id: null, name: 'Rent', amount: 21000, frequency: 'monthly', day_of_month: 1, day_of_week: null, is_active: true, created_at: '', updated_at: '' },
-  { id: 'rec-2', user_id: '', category_id: 'Electricity', account_id: null, name: 'Electricity', amount: 1200, frequency: 'monthly', day_of_month: 5, day_of_week: null, is_active: true, created_at: '', updated_at: '' },
-  { id: 'rec-3', user_id: '', category_id: 'Internet', account_id: null, name: 'Internet', amount: 1000, frequency: 'monthly', day_of_month: 10, day_of_week: null, is_active: true, created_at: '', updated_at: '' },
-  { id: 'rec-4', user_id: '', category_id: 'SIP', account_id: null, name: 'SIP', amount: 7000, frequency: 'monthly', day_of_month: 15, day_of_week: null, is_active: true, created_at: '', updated_at: '' },
-];
+import { useRecurringStore } from '@/stores/recurring-store';
 
 export const Route = createFileRoute('/planner')({
   component: PlannerPage,
@@ -50,9 +39,10 @@ function PlannerPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Load recurring subscriptions into fixed expenses on mount
+  // Sync fixed expenses with recurring store (Settings → Recurring)
+  const recurringFromStore = useRecurringStore((s) => s.expenses);
   useEffect(() => {
-    const defaults: PlannerExpenseEntry[] = DEFAULT_RECURRING_EXPENSES
+    const entries: PlannerExpenseEntry[] = recurringFromStore
       .filter((r) => r.is_active)
       .map((r, i) => ({
         categoryId: `rec-${i}`,
@@ -61,9 +51,8 @@ function PlannerPage() {
         actual: r.amount,
         isRecurring: true,
       }));
-    setFixedExpenses(defaults);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setFixedExpenses(entries);
+  }, [recurringFromStore]);
 
   // Compute the summary from current entries
   const summary: PlannerSummary = useMemo(() => {

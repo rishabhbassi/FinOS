@@ -11,13 +11,6 @@ interface VariableBudgetSectionProps {
   onUpdate: (categories: PlannerVariableEntry[]) => void;
 }
 
-const DEFAULT_DAILY_LIMITS: { name: string; daily: number }[] = [
-  { name: 'Food', daily: 300 },
-  { name: 'Fuel', daily: 200 },
-  { name: 'Shopping', daily: 200 },
-  { name: 'Entertainment', daily: 150 },
-];
-
 export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSectionProps) {
   const [localCategories, setLocalCategories] = useState<PlannerVariableEntry[]>(categories);
   const [error, setError] = useState<string | null>(null);
@@ -114,25 +107,8 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
   }
 
   function handleRetry() {
-    setIsLoading(true);
+    setIsLoading(false);
     setError(null);
-    setTimeout(() => {
-      const defaults: PlannerVariableEntry[] = DEFAULT_DAILY_LIMITS.map((d, i) => ({
-        categoryId: `var-${i}`,
-        categoryName: d.name,
-        dailyLimit: d.daily,
-        monthlyBudget: d.daily * 30,
-        spent: Math.round(d.daily * 30 * (Math.random() * 0.5 + 0.25)),
-        remaining: 0,
-      }));
-      const withRemaining = defaults.map((c) => ({
-        ...c,
-        remaining: c.monthlyBudget - c.spent,
-      }));
-      setLocalCategories(withRemaining);
-      onUpdate(withRemaining);
-      setIsLoading(false);
-    }, 600);
   }
 
   // Error state
@@ -194,6 +170,15 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
 
   // Empty state
   if (localCategories.length === 0) {
+    const SUGGESTED_CATEGORIES = [
+      { name: 'Food', limit: 300, freq: 'daily' as BudgetFrequency },
+      { name: 'Fuel', limit: 500, freq: 'weekly' as BudgetFrequency },
+      { name: 'Shopping', limit: 3000, freq: 'monthly' as BudgetFrequency },
+      { name: 'Entertainment', limit: 200, freq: 'weekly' as BudgetFrequency },
+      { name: 'Medical', limit: 500, freq: 'monthly' as BudgetFrequency },
+      { name: 'Travel', limit: 200, freq: 'weekly' as BudgetFrequency },
+    ];
+
     return (
       <div className="demo-panel rounded-2xl p-6">
         <div className="flex flex-col items-center gap-4 py-8 text-center">
@@ -205,16 +190,35 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
               No variable budget categories yet
             </p>
             <p className="mt-1 text-xs text-[var(--sea-ink-soft)]">
-              Set daily limits for food, fuel, shopping, and other variable expenses.
+              Set budgets for food, fuel, shopping, and other variable expenses.
             </p>
           </div>
-          <button
-            onClick={handleRetry}
-            className="demo-button inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Add Default Categories
-          </button>
+          <div className="flex flex-wrap justify-center gap-2">
+            {SUGGESTED_CATEGORIES.map((cat) => (
+              <button
+                key={cat.name}
+                onClick={() => {
+                  const monthly = calcMonthlyBudget(cat.limit, cat.freq);
+                  const entry: PlannerVariableEntry = {
+                    categoryId: generateId(),
+                    categoryName: cat.name,
+                    dailyLimit: cat.limit,
+                    monthlyBudget: monthly,
+                    spent: 0,
+                    remaining: monthly,
+                    frequency: cat.freq,
+                  };
+                  const updated = [...localCategories, entry];
+                  setLocalCategories(updated);
+                  onUpdate(updated);
+                }}
+                className="demo-button-secondary inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
