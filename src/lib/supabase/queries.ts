@@ -158,10 +158,12 @@ export const transactionQueries = {
   },
 
   async delete(id: string): Promise<void> {
+    const user_id = await ensureSession();
     const { error } = await supabase
       .from('transactions')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user_id);
     if (error) throw error;
   },
 };

@@ -72,7 +72,7 @@ export default function ProgressBar({
         />
       </div>
       {showLabel && (
-        <span className={cn('text-xs font-semibold tabular-nums', styles.label)}>
+        <span className={cn('text-xs font-semibold font-mono tabular-nums', styles.label)}>
           {Math.round(percentage)}%
         </span>
       )}

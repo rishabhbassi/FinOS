@@ -76,9 +76,9 @@ export default function ReportFilters({
 
   return (
     <div className="island-shell demo-panel">
+      {/* Row 1: Period + Month */}
       <div className="flex flex-wrap items-end gap-4">
-        {/* Period Selector */}
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-none min-w-[200px]">
           <label className="mb-1.5 block text-xs font-semibold text-[var(--sea-ink-soft)]">
             <CalendarDays className="-mt-0.5 mr-1 inline-block h-3.5 w-3.5" />
             Period
@@ -90,7 +90,7 @@ export default function ReportFilters({
                 type="button"
                 onClick={() => updateFilter('period', p.value)}
                 className={cn(
-                  'flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-all',
+                  'flex-1 rounded-md px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all',
                   filters.period === p.value
                     ? 'bg-[var(--lagoon)] text-white shadow-sm'
                     : 'text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]'
@@ -102,9 +102,9 @@ export default function ReportFilters({
           </div>
         </div>
 
-        {/* Month Dropdown */}
+        {/* Month Dropdown - same row as Period */}
         {filters.period === 'month' && (
-          <div className="flex-1 min-w-[160px]">
+          <div className="flex-1 min-w-[140px]">
             <label className="mb-1.5 block text-xs font-semibold text-[var(--sea-ink-soft)]">
               Month
             </label>
@@ -121,7 +121,10 @@ export default function ReportFilters({
             </select>
           </div>
         )}
+      </div>
 
+      {/* Row 2: Category + Type + Generate */}
+      <div className="mt-4 flex flex-wrap items-end gap-4">
         {/* Category Filter */}
         <div className="flex-1 min-w-[160px]">
           <label className="mb-1.5 block text-xs font-semibold text-[var(--sea-ink-soft)]">
@@ -153,7 +156,7 @@ export default function ReportFilters({
                 type="button"
                 onClick={() => updateFilter('type', t.value)}
                 className={cn(
-                  'flex-1 rounded-md px-3 py-1.5 text-xs font-semibold transition-all',
+                  'flex-1 rounded-md px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all',
                   filters.type === t.value
                     ? 'bg-[var(--lagoon)] text-white shadow-sm'
                     : 'text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)]'

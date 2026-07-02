@@ -168,17 +168,17 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
     );
   }
 
+  const SUGGESTED_CATEGORIES = [
+    { name: 'Food', limit: 300, freq: 'daily' as BudgetFrequency },
+    { name: 'Fuel', limit: 500, freq: 'weekly' as BudgetFrequency },
+    { name: 'Shopping', limit: 3000, freq: 'monthly' as BudgetFrequency },
+    { name: 'Entertainment', limit: 200, freq: 'weekly' as BudgetFrequency },
+    { name: 'Medical', limit: 500, freq: 'monthly' as BudgetFrequency },
+    { name: 'Travel', limit: 200, freq: 'weekly' as BudgetFrequency },
+  ];
+
   // Empty state
   if (localCategories.length === 0) {
-    const SUGGESTED_CATEGORIES = [
-      { name: 'Food', limit: 300, freq: 'daily' as BudgetFrequency },
-      { name: 'Fuel', limit: 500, freq: 'weekly' as BudgetFrequency },
-      { name: 'Shopping', limit: 3000, freq: 'monthly' as BudgetFrequency },
-      { name: 'Entertainment', limit: 200, freq: 'weekly' as BudgetFrequency },
-      { name: 'Medical', limit: 500, freq: 'monthly' as BudgetFrequency },
-      { name: 'Travel', limit: 200, freq: 'weekly' as BudgetFrequency },
-    ];
-
     return (
       <div className="demo-panel rounded-2xl p-6">
         <div className="flex flex-col items-center gap-4 py-8 text-center">
@@ -247,13 +247,51 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
               Cancel
             </button>
           ) : (
-            <button
-              onClick={() => setShowAddForm(true)}
-              className="demo-button inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add Category
-            </button>
+            <>
+              <div className="group relative">
+                <button className="demo-button-secondary inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold">
+                  <Plus className="h-3.5 w-3.5" />
+                  Preset
+                </button>
+                <div className="invisible absolute right-0 top-full z-10 mt-1 min-w-[160px] rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] p-1.5 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
+                  {SUGGESTED_CATEGORIES.filter(
+                    (sc) => !localCategories.some((c) => c.categoryName === sc.name)
+                  ).map((sc) => (
+                    <button
+                      key={sc.name}
+                      onClick={() => {
+                        const monthly = calcMonthlyBudget(sc.limit, sc.freq);
+                        const entry: PlannerVariableEntry = {
+                          categoryId: generateId(),
+                          categoryName: sc.name,
+                          dailyLimit: sc.limit,
+                          monthlyBudget: monthly,
+                          spent: 0,
+                          remaining: monthly,
+                          frequency: sc.freq,
+                        };
+                        const updated = [...localCategories, entry];
+                        setLocalCategories(updated);
+                        onUpdate(updated);
+                      }}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-xs font-medium text-[var(--sea-ink)] transition hover:bg-[var(--surface)]"
+                    >
+                      <span>{sc.name}</span>
+                      <span className="font-mono tabular-nums text-[var(--sea-ink-soft)]">
+                        {'₹'}{sc.limit}/{sc.freq === 'daily' ? 'd' : sc.freq === 'weekly' ? 'w' : 'm'}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="demo-button inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Custom
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -292,7 +330,7 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
                     value={newDailyLimit}
                     onChange={(e) => setNewDailyLimit(e.target.value)}
                     placeholder="Amount"
-                    className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold tabular-nums"
+                    className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold font-mono tabular-nums"
                   />
                 </div>
                 <select
@@ -308,7 +346,7 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-[var(--sea-ink-soft)]">
                   Monthly budget auto-calculated:{' '}
-                  <span className="tabular-nums font-semibold text-[var(--sea-ink)]">
+                  <span className="font-mono tabular-nums font-semibold text-[var(--sea-ink)]">
                     {formatCurrency(
                       calcMonthlyBudget(parseFloat(newDailyLimit) || 0, newFrequency)
                     )}
@@ -394,7 +432,7 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
                       onChange={(e) =>
                         handleDailyLimitChange(category.categoryId, e.target.value)
                       }
-                      className="demo-input w-full rounded-lg py-1 pl-5 pr-2 text-[11px] font-semibold tabular-nums"
+                      className="demo-input w-full rounded-lg py-1 pl-5 pr-2 text-[11px] font-semibold font-mono tabular-nums"
                       placeholder="0"
                     />
                   </div>
@@ -420,15 +458,15 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
               />
 
               <div className="mt-2 flex items-center justify-between text-[10px]">
-                <span className="tabular-nums text-[var(--sea-ink-soft)]">
+                <span className="font-mono tabular-nums text-[var(--sea-ink-soft)]">
                   Budget: {formatCurrency(category.monthlyBudget)}
                 </span>
-                <span className="tabular-nums text-[var(--sea-ink-soft)]">
+                <span className="font-mono tabular-nums text-[var(--sea-ink-soft)]">
                   Spent: {formatCurrency(category.spent)}
                 </span>
                 <span
                   className={cn(
-                    'tabular-nums font-semibold',
+                    'font-mono tabular-nums font-semibold',
                     remaining < 0
                       ? 'text-red-500'
                       : remaining < category.monthlyBudget * 0.1
@@ -450,7 +488,7 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
           <span className="text-xs font-semibold text-[var(--sea-ink)]">
             Total Variable Budget
           </span>
-          <span className="text-sm font-bold text-[var(--sea-ink)] tabular-nums">
+          <span className="text-sm font-bold text-[var(--sea-ink)] font-mono tabular-nums">
             {formatCurrency(totalMonthlyBudget)}
           </span>
         </div>
@@ -459,7 +497,7 @@ export function VariableBudgetSection({ categories, onUpdate }: VariableBudgetSe
             <span className="text-[10px] text-[var(--sea-ink-soft)]">
               Total Spent
             </span>
-            <span className="text-[11px] font-medium text-[var(--sea-ink-soft)] tabular-nums">
+            <span className="text-[11px] font-medium text-[var(--sea-ink-soft)] font-mono tabular-nums">
               {formatCurrency(totalSpent)}
             </span>
           </div>

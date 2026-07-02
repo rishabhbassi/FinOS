@@ -121,7 +121,7 @@ export default function BudgetUtilizationReport({
                 <span className="truncate text-sm font-medium text-[var(--sea-ink)]">
                   {item.category}
                 </span>
-                <div className="flex items-center gap-3 text-xs tabular-nums">
+                <div className="flex items-center gap-3 text-xs font-mono tabular-nums">
                   <span className="hidden text-[var(--sea-ink-soft)] md:inline-block w-20 text-right">
                     {formatCurrency(item.budget)}
                   </span>

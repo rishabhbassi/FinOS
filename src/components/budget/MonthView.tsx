@@ -135,13 +135,13 @@ export function MonthView({ month, loading, error, onRetry }: MonthViewProps) {
       <div className="mb-5 grid grid-cols-3 gap-3">
         <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 text-center">
           <p className="text-[10px] text-[var(--sea-ink-soft)]">Income</p>
-          <p className="mt-0.5 text-xs font-bold tabular-nums text-[var(--lagoon-deep)]">
+          <p className="mt-0.5 text-xs font-bold font-mono tabular-nums text-[var(--lagoon-deep)]">
             {formatCurrency(month.totalIncome)}
           </p>
         </div>
         <div className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-3 text-center">
           <p className="text-[10px] text-[var(--sea-ink-soft)]">Spent</p>
-          <p className="mt-0.5 text-xs font-bold tabular-nums text-[var(--sea-ink)]">
+          <p className="mt-0.5 text-xs font-bold font-mono tabular-nums text-[var(--sea-ink)]">
             {formatCurrency(month.totalSpent)}
           </p>
         </div>
@@ -149,7 +149,7 @@ export function MonthView({ month, loading, error, onRetry }: MonthViewProps) {
           <p className="text-[10px] text-[var(--sea-ink-soft)]">Savings</p>
           <p
             className={cn(
-              'mt-0.5 text-xs font-bold tabular-nums',
+              'mt-0.5 text-xs font-bold font-mono tabular-nums',
               month.savings >= 0
                 ? 'text-emerald-600 dark:text-emerald-400'
                 : 'text-red-500 dark:text-red-400'
@@ -195,27 +195,27 @@ export function MonthView({ month, loading, error, onRetry }: MonthViewProps) {
                   <div className="text-sm font-bold text-[var(--sea-ink)]">Week {week.weekNumber}</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <span className="text-[var(--sea-ink-soft)]">Budget</span>
-                    <span className="tabular-nums text-right font-medium">{formatCurrency(week.totalBudget)}</span>
+                    <span className="font-mono tabular-nums text-right font-medium">{formatCurrency(week.totalBudget)}</span>
                     <span className="text-[var(--sea-ink-soft)]">Spent</span>
-                    <span className="tabular-nums text-right font-medium">{formatCurrency(week.totalSpent)}</span>
+                    <span className="font-mono tabular-nums text-right font-medium">{formatCurrency(week.totalSpent)}</span>
                     <span className="text-[var(--sea-ink-soft)]">Surplus</span>
-                    <span className={cn('tabular-nums text-right font-semibold', week.surplus >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                    <span className={cn('font-mono tabular-nums text-right font-semibold', week.surplus >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
                       {week.surplus >= 0 ? '+' : ''}{formatCurrency(week.surplus)}
                     </span>
                     <span className="text-[var(--sea-ink-soft)]">Carry Fwd</span>
-                    <span className="tabular-nums text-right font-semibold text-[var(--lagoon-deep)]">{formatCurrency(week.carryForward)}</span>
+                    <span className="font-mono tabular-nums text-right font-semibold text-[var(--lagoon-deep)]">{formatCurrency(week.carryForward)}</span>
                   </div>
                 </div>
 
                 {/* Desktop: row layout */}
                 <div className="hidden items-center gap-3 sm:flex">
                   <span className="min-w-[52px] text-xs font-semibold text-[var(--sea-ink)]">Week {week.weekNumber}</span>
-                  <span className="min-w-[72px] text-xs tabular-nums text-[var(--sea-ink-soft)]">{formatCurrency(week.totalBudget)}</span>
-                  <span className="min-w-[72px] text-xs font-medium tabular-nums text-[var(--sea-ink)]">{formatCurrency(week.totalSpent)}</span>
-                  <span className={cn('min-w-[72px] text-xs font-semibold tabular-nums', week.surplus >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                  <span className="min-w-[72px] text-xs font-mono tabular-nums text-[var(--sea-ink-soft)]">{formatCurrency(week.totalBudget)}</span>
+                  <span className="min-w-[72px] text-xs font-medium font-mono tabular-nums text-[var(--sea-ink)]">{formatCurrency(week.totalSpent)}</span>
+                  <span className={cn('min-w-[72px] text-xs font-semibold font-mono tabular-nums', week.surplus >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
                     {week.surplus >= 0 ? '+' : ''}{formatCurrency(week.surplus)}
                   </span>
-                  <span className="min-w-[80px] text-right text-xs font-semibold tabular-nums text-[var(--lagoon-deep)]">{formatCurrency(week.carryForward)}</span>
+                  <span className="min-w-[80px] text-right text-xs font-semibold font-mono tabular-nums text-[var(--lagoon-deep)]">{formatCurrency(week.carryForward)}</span>
                 </div>
               </motion.div>
 
@@ -247,13 +247,13 @@ export function MonthView({ month, loading, error, onRetry }: MonthViewProps) {
         <div className="flex items-center gap-6">
           <div className="text-right">
             <p className="text-[10px] text-[var(--sea-ink-soft)]">Budget</p>
-            <p className="text-xs font-bold tabular-nums text-[var(--sea-ink)]">
+            <p className="text-xs font-bold font-mono tabular-nums text-[var(--sea-ink)]">
               {formatCurrency(month.variableBudget)}
             </p>
           </div>
           <div className="text-right">
             <p className="text-[10px] text-[var(--sea-ink-soft)]">Spent</p>
-            <p className="text-xs font-bold tabular-nums text-[var(--sea-ink)]">
+            <p className="text-xs font-bold font-mono tabular-nums text-[var(--sea-ink)]">
               {formatCurrency(month.totalSpent)}
             </p>
           </div>
@@ -261,7 +261,7 @@ export function MonthView({ month, loading, error, onRetry }: MonthViewProps) {
             <p className="text-[10px] text-[var(--sea-ink-soft)]">Savings Rate</p>
             <p
               className={cn(
-                'text-xs font-bold tabular-nums',
+                'text-xs font-bold font-mono tabular-nums',
                 month.savingsRate >= 0
                   ? 'text-emerald-600 dark:text-emerald-400'
                   : 'text-red-500 dark:text-red-400'

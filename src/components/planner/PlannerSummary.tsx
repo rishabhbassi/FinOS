@@ -166,7 +166,7 @@ export function PlannerSummary({ summary, onScenarioChange }: PlannerSummaryProp
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-lg font-extrabold text-[var(--sea-ink)] tabular-nums">
+            <span className="text-lg font-extrabold text-[var(--sea-ink)] font-mono tabular-nums">
               {summary.savingsRate.toFixed(0)}%
             </span>
             <span className="text-[10px] text-[var(--sea-ink-soft)]">Saved</span>
@@ -179,7 +179,7 @@ export function PlannerSummary({ summary, onScenarioChange }: PlannerSummaryProp
         <p className="text-xs text-[var(--sea-ink-soft)]">Projected Savings</p>
         <motion.p
           className={cn(
-            'text-3xl font-extrabold tracking-tight tabular-nums',
+            'text-3xl font-extrabold tracking-tight font-mono tabular-nums',
             isPositive ? 'text-[var(--lagoon-deep)]' : 'text-red-500'
           )}
         >
@@ -251,7 +251,7 @@ function SummaryRow({
       <span className="text-xs text-[var(--sea-ink-soft)]">{label}</span>
       <span
         className={cn(
-          'text-xs font-semibold tabular-nums',
+          'text-xs font-semibold font-mono tabular-nums',
           valueClass ?? 'text-[var(--sea-ink)]'
         )}
       >

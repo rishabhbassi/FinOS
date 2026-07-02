@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Wallet, TrendingUp, PiggyBank, ArrowLeftRight, ShoppingBag, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Wallet, TrendingUp, PiggyBank, ArrowLeftRight, ShoppingBag, Sparkles, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import StatCard from '@/components/shared/StatCard';
 import Card from '@/components/shared/Card';
 import { useAuthStore } from '@/stores/auth-store';
 import { useDashboard } from '@/hooks/use-dashboard';
 import { formatCurrency } from '@/lib/utils';
+import { useQuickEntryStore } from '@/stores/quick-entry-store';
 
 export const Route = createFileRoute('/')({ component: DashboardPage });
 
@@ -20,6 +22,15 @@ function DashboardPage() {
   const { user } = useAuthStore();
   const firstName = user?.name?.split(' ')[0] ?? 'there';
   const { dashboardData, loading, error, refresh } = useDashboard();
+  const openQuickEntry = useQuickEntryStore((s) => s.openQuickEntry);
+  const quickEntryOpen = useQuickEntryStore((s) => s.open);
+  const prevQeRef = useRef(quickEntryOpen);
+  useEffect(() => {
+    if (prevQeRef.current && !quickEntryOpen) {
+      refresh();
+    }
+    prevQeRef.current = quickEntryOpen;
+  }, [quickEntryOpen, refresh]);
 
   if (loading) {
     return (
@@ -64,10 +75,13 @@ function DashboardPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Link to="/planner" className="demo-button">
+              <button onClick={openQuickEntry} className="demo-button whitespace-nowrap">
+                <Sparkles className="h-4 w-4" /> Quick Add
+              </button>
+              <Link to="/planner" className="demo-button-secondary inline-flex items-center gap-1.5 whitespace-nowrap">
                 <Wallet className="h-4 w-4" /> Go to Planner
               </Link>
-              <Link to="/transactions" className="demo-button-secondary">
+              <Link to="/transactions" className="demo-button-secondary inline-flex items-center gap-1.5 whitespace-nowrap">
                 <ArrowLeftRight className="h-4 w-4" /> Transactions
               </Link>
             </div>
@@ -133,7 +147,7 @@ function DashboardPage() {
                           {tx.date}
                         </p>
                       </div>
-                      <span className={`text-sm font-semibold tabular-nums ${tx.type === 'income' ? 'text-emerald-600' : 'text-[var(--sea-ink)]'}`}>
+                      <span className={`text-sm font-semibold font-mono tabular-nums ${tx.type === 'income' ? 'text-emerald-600' : 'text-[var(--sea-ink)]'}`}>
                         {tx.type === 'income' ? '+' : '−'}{formatCurrency(Math.abs(tx.amount))}
                       </span>
                     </div>

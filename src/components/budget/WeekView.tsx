@@ -275,7 +275,7 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
                   </div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                     <span className="text-[var(--sea-ink-soft)]">Budget</span>
-                    <span className="tabular-nums text-right font-medium text-[var(--sea-ink)]">
+                    <span className="font-mono tabular-nums text-right font-medium text-[var(--sea-ink)]">
                       {editMode ? (
                         <input
                           type="number"
@@ -283,7 +283,7 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
                           onChange={(e) =>
                             setBudgetInputs((prev) => ({ ...prev, [day.date]: e.target.value }))
                           }
-                          className="w-20 rounded border border-[var(--line)] bg-[var(--surface)] px-1.5 py-0.5 text-xs tabular-nums outline-none focus:border-[var(--lagoon)]"
+                          className="w-20 rounded border border-[var(--line)] bg-[var(--surface)] px-1.5 py-0.5 text-xs font-mono tabular-nums outline-none focus:border-[var(--lagoon)]"
                           min="0"
                         />
                       ) : (
@@ -291,13 +291,13 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
                       )}
                     </span>
                     <span className="text-[var(--sea-ink-soft)]">Spent</span>
-                    <span className="tabular-nums text-right font-medium">{formatCurrency(day.spent)}</span>
+                    <span className="font-mono tabular-nums text-right font-medium">{formatCurrency(day.spent)}</span>
                     <span className="text-[var(--sea-ink-soft)]">Remaining</span>
-                    <span className={cn('tabular-nums text-right font-semibold', day.remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                    <span className={cn('font-mono tabular-nums text-right font-semibold', day.remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
                       {formatCurrency(day.remaining)}
                     </span>
                     <span className="text-[var(--sea-ink-soft)]">Carry Fwd</span>
-                    <span className={cn('tabular-nums text-right font-semibold', isSurplus ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                    <span className={cn('font-mono tabular-nums text-right font-semibold', isSurplus ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
                       {isSurplus ? '+' : ''}{formatCurrency(carryDisplay)}
                     </span>
                   </div>
@@ -316,23 +316,23 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
                       type="number"
                       value={budgetInputs[day.date] ?? String(effectiveBudget)}
                       onChange={(e) => setBudgetInputs((prev) => ({ ...prev, [day.date]: e.target.value }))}
-                      className="min-w-[72px] rounded border border-[var(--line)] bg-[var(--surface)] px-1.5 py-1 text-xs tabular-nums outline-none focus:border-[var(--lagoon)] focus:ring-1 focus:ring-[var(--lagoon)]/30"
+                      className="min-w-[72px] rounded border border-[var(--line)] bg-[var(--surface)] px-1.5 py-1 text-xs font-mono tabular-nums outline-none focus:border-[var(--lagoon)] focus:ring-1 focus:ring-[var(--lagoon)]/30"
                       min="0" step="1"
                     />
                   ) : (
-                    <span className="min-w-[72px] text-xs tabular-nums text-[var(--sea-ink-soft)]">{formatCurrency(effectiveBudget)}</span>
+                    <span className="min-w-[72px] text-xs font-mono tabular-nums text-[var(--sea-ink-soft)]">{formatCurrency(effectiveBudget)}</span>
                   )}
 
                   {/* Spent */}
-                  <span className="min-w-[72px] text-xs font-medium tabular-nums text-[var(--sea-ink)]">{formatCurrency(day.spent)}</span>
+                  <span className="min-w-[72px] text-xs font-medium font-mono tabular-nums text-[var(--sea-ink)]">{formatCurrency(day.spent)}</span>
 
                   {/* Remaining */}
-                  <span className={cn('min-w-[80px] text-right text-xs font-semibold tabular-nums', day.remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                  <span className={cn('min-w-[80px] text-right text-xs font-semibold font-mono tabular-nums', day.remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
                     {formatCurrency(day.remaining)}
                   </span>
 
                   {/* Carry Forward */}
-                  <span className={cn('min-w-[88px] text-xs font-semibold tabular-nums', isSurplus ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                  <span className={cn('min-w-[88px] text-xs font-semibold font-mono tabular-nums', isSurplus ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
                     {isSurplus ? '+' : ''}{formatCurrency(carryDisplay)}
                   </span>
 
@@ -362,13 +362,13 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
         <div className="flex items-center gap-6">
           <div className="text-right">
             <p className="text-[10px] text-[var(--sea-ink-soft)]">Budget</p>
-            <p className="text-xs font-bold tabular-nums text-[var(--sea-ink)]">
+            <p className="text-xs font-bold font-mono tabular-nums text-[var(--sea-ink)]">
               {formatCurrency(weekTotalBudget)}
             </p>
           </div>
           <div className="text-right">
             <p className="text-[10px] text-[var(--sea-ink-soft)]">Spent</p>
-            <p className="text-xs font-bold tabular-nums text-[var(--sea-ink)]">
+            <p className="text-xs font-bold font-mono tabular-nums text-[var(--sea-ink)]">
               {formatCurrency(weekTotalSpent)}
             </p>
           </div>
@@ -378,7 +378,7 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
             </p>
             <p
               className={cn(
-                'text-xs font-bold tabular-nums',
+                'text-xs font-bold font-mono tabular-nums',
                 weekRemaining >= 0
                   ? 'text-emerald-600 dark:text-emerald-400'
                   : 'text-red-500 dark:text-red-400',

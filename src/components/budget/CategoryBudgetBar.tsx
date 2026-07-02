@@ -181,14 +181,14 @@ export function CategoryBudgetBar({
                   {item.category}
                 </span>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs tabular-nums text-[var(--sea-ink-soft)]">
+                  <span className="text-xs font-mono tabular-nums text-[var(--sea-ink-soft)]">
                     {formatCurrency(item.spent)}
                     <span className="mx-0.5 text-[var(--kicker)]">/</span>
                     {formatCurrency(item.budget)}
                   </span>
                   <span
                     className={cn(
-                      'min-w-[40px] text-right text-xs font-bold tabular-nums',
+                      'min-w-[40px] text-right text-xs font-bold font-mono tabular-nums',
                       getProgressLabelColor(item.percentage)
                     )}
                   >

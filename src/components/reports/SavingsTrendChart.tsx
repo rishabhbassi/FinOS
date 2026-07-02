@@ -46,7 +46,7 @@ function CustomTooltip({
             />
             {entry.name}
           </span>
-          <span className="font-semibold tabular-nums text-[var(--sea-ink)]">
+          <span className="font-semibold font-mono tabular-nums text-[var(--sea-ink)]">
             {formatCurrency(entry.value)}
           </span>
         </div>

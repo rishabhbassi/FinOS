@@ -166,7 +166,11 @@ function SettingsPage() {
     name: string;
     currency: string;
     avatar_url: string | null;
-  }>({ name: '', currency: 'INR', avatar_url: null });
+  }>({
+    name: '',
+    currency: 'INR',
+    avatar_url: null,
+  });
 
   // Load profile from Supabase on mount
   useEffect(() => {
@@ -237,13 +241,24 @@ function SettingsPage() {
 
   // ---- Profile handlers ----
   const handleProfileSave = useCallback(
-    async (updated: { name: string; currency: string; avatar_url?: string | null }) => {
-      setProfile({ name: updated.name, currency: updated.currency, avatar_url: updated.avatar_url ?? null });
+    async (updated: {
+      name: string;
+      currency: string;
+      avatar_url?: string | null;
+    }) => {
+      setProfile({
+        name: updated.name,
+        currency: updated.currency,
+        avatar_url: updated.avatar_url ?? null,
+      });
       if (authUserId) {
         try {
           const { error } = await supabase
             .from('profiles')
-            .update({ full_name: updated.name, currency: updated.currency })
+            .update({
+              full_name: updated.name,
+              currency: updated.currency,
+            })
             .eq('id', authUserId);
           if (error) {
             showToast('error', `Failed to save profile: ${error.message}`);

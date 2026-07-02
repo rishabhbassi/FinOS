@@ -7,6 +7,7 @@ import {
   calculateCategoryBreakdown,
 } from '@/lib/budget-engine';
 import { toDateString, getDaysInMonth } from '@/lib/utils';
+import { transactionQueries } from '@/lib/supabase/queries';
 
 /**
  * Compute the month overview including total income, expenses, savings,
@@ -53,48 +54,58 @@ export function useDashboard(): {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const compute = useCallback(() => {
+  const compute = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const now = new Date();
-      const totalIncome = 0;
-      const fixedExpenses = 0;
 
-      // Empty data — real Supabase data will be loaded once integrated
-      const allTransactions: Transaction[] = [];
-      const variableTransactions: Transaction[] = [];
+      // Load real transactions from Supabase
+      const allTransactions = await transactionQueries.list(100);
 
-      // Daily decision uses variable-only transactions (fixed handled via param)
+      const totalIncome = allTransactions
+        .filter((t) => t.type === 'income')
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+      const totalExpenses = allTransactions
+        .filter((t) => t.type === 'expense')
+        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+      // If no transactions at all, show empty state
+      if (allTransactions.length === 0) {
+        setDashboardData(null);
+        setLoading(false);
+        return;
+      }
+
+      const variableTransactions = allTransactions.filter((t) => t.type === 'expense');
+
+      // Daily decision
       const dailyDecision = calculateDailyDecision(
         totalIncome,
-        fixedExpenses,
+        totalExpenses,
         variableTransactions,
         now,
       );
 
-      // Category breakdown uses all transactions for the full financial picture
-      const categoryBreakdown = calculateCategoryBreakdown(
-        allTransactions,
-        [],
-      );
+      // Category breakdown
+      const categoryBreakdown = calculateCategoryBreakdown(allTransactions, []);
 
-      // Compute monthly budget to derive week overview and timeline
+      // Monthly budget to derive week overview and timeline
       const monthBudget = calculateMonthlyBudget(
         totalIncome,
-        fixedExpenses,
+        totalExpenses,
         variableTransactions,
         [],
         now,
       );
 
-      // Derive current week overview from the budget month
+      // Current week overview
       const todayStr = toDateString(now);
       const currentWeek = monthBudget.weeks.find(
         (w) => todayStr >= w.startDate && todayStr <= w.endDate,
       );
-
       const weekOverview = currentWeek
         ? {
             available: currentWeek.totalBudget,
@@ -104,32 +115,18 @@ export function useDashboard(): {
           }
         : { available: 0, spent: 0, remaining: 0, surplus: 0 };
 
-      // Compute month overview from all transactions
-      const monthOverview = computeMonthOverview(
-        allTransactions,
-        totalIncome,
-      );
+      // Month overview
+      const monthOverview = computeMonthOverview(allTransactions, totalIncome);
 
-      // Recent transactions (last 10, already sorted most-recent-first)
+      // Recent transactions
       const recentTransactions = allTransactions.slice(0, 10);
 
-      // Build budget timeline from each day in the budget month
-      const budgetTimeline: { day: string; available: number; spent: number }[] =
-        [];
+      // Budget timeline
+      const budgetTimeline: { day: string; available: number; spent: number }[] = [];
       for (const week of monthBudget.weeks) {
         for (const day of week.days) {
-          budgetTimeline.push({
-            day: day.date,
-            available: day.available,
-            spent: day.spent,
-          });
+          budgetTimeline.push({ day: day.date, available: day.available, spent: day.spent });
         }
-      }
-
-      // If no income at all, return null to show empty state
-      if (totalIncome <= 0 || allTransactions.length === 0) {
-        setDashboardData(null);
-        return;
       }
 
       // Monthly comparison
@@ -138,17 +135,13 @@ export function useDashboard(): {
           savings: monthOverview.savings,
           expenses: monthOverview.expenses,
         },
-        lastMonth: {
-          savings: 0,
-          expenses: 0,
-        },
+        lastMonth: { savings: 0, expenses: 0 },
         change: {
           savings: monthOverview.savings,
           expenses: monthOverview.expenses,
         },
       };
 
-      // Build the final dashboard data object
       setDashboardData({
         dailyDecision,
         weekOverview,
@@ -159,21 +152,24 @@ export function useDashboard(): {
         monthlyComparison,
       } as DashboardData);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to compute dashboard data',
-      );
+      setError(err instanceof Error ? err.message : 'Failed to compute dashboard data');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Simulate a 400ms loading delay on mount
+  // Load data on mount. Re-compute when window regains focus or user adds data.
+  const [refreshKey, setRefreshKey] = useState(0);
   useEffect(() => {
-    const timer = setTimeout(() => {
-      compute();
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [compute]);
+    compute();
+  }, [compute, refreshKey]);
+
+  // Also re-compute when the window gains focus (e.g. user returns from another tab)
+  useEffect(() => {
+    const onFocus = () => setRefreshKey((k) => k + 1);
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
 
   const refresh = useCallback(() => {
     compute();

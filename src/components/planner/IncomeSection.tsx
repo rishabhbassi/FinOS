@@ -1,7 +1,7 @@
 // Finance OS - Income Section
 import { useState, useMemo } from 'react';
-import { motion } from 'motion/react';
-import { Plus, Trash2, AlertCircle, RefreshCw, Wallet } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Plus, Trash2, AlertCircle, RefreshCw, Wallet, X, Check } from 'lucide-react';
 import type { PlannerIncomeEntry } from '@/types/app';
 import { formatCurrency, cn, generateId } from '@/lib/utils';
 
@@ -12,10 +12,20 @@ interface IncomeSectionProps {
 
 const SOURCE_OPTIONS = ['Salary', 'Bonus', 'Freelancing', 'Interest', 'Other'];
 
+const INCOME_PRESETS = [
+  { name: 'Salary', amount: 60000 },
+  { name: 'Bonus', amount: 10000 },
+  { name: 'Freelancing', amount: 15000 },
+  { name: 'Interest', amount: 2000 },
+];
+
 export function IncomeSection({ entries, onUpdate }: IncomeSectionProps) {
   const [localEntries, setLocalEntries] = useState<PlannerIncomeEntry[]>(entries);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newAmount, setNewAmount] = useState('');
 
   const totalIncome = useMemo(
     () => localEntries.reduce((sum, e) => sum + e.planned, 0),
@@ -60,6 +70,49 @@ export function IncomeSection({ entries, onUpdate }: IncomeSectionProps) {
     setLocalEntries(updated);
     onUpdate(updated);
     setError(null);
+  }
+
+  function handleAddFromPreset(name: string, amount: number) {
+    const exists = localEntries.some(
+      (e) => e.categoryName.toLowerCase() === name.toLowerCase()
+    );
+    if (exists) return;
+
+    const newEntry: PlannerIncomeEntry = {
+      categoryId: generateId(),
+      categoryName: name,
+      planned: amount,
+      actual: 0,
+    };
+    const updated = [...localEntries, newEntry];
+    setLocalEntries(updated);
+    onUpdate(updated);
+  }
+
+  function handleAddCustom() {
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+
+    const parsedAmount = parseFloat(newAmount);
+    if (isNaN(parsedAmount) || parsedAmount < 0) return;
+
+    const exists = localEntries.some(
+      (e) => e.categoryName.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (exists) return;
+
+    const newEntry: PlannerIncomeEntry = {
+      categoryId: generateId(),
+      categoryName: trimmed,
+      planned: parsedAmount,
+      actual: 0,
+    };
+    const updated = [...localEntries, newEntry];
+    setLocalEntries(updated);
+    onUpdate(updated);
+    setNewName('');
+    setNewAmount('');
+    setShowAddForm(false);
   }
 
   function handleRetry() {
@@ -179,31 +232,138 @@ export function IncomeSection({ entries, onUpdate }: IncomeSectionProps) {
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[var(--sea-ink)]">Income Sources</h3>
         <div className="flex items-center gap-1.5">
-          {SOURCE_OPTIONS.filter(
-            (s) => !localEntries.some((e) => e.categoryName === s)
-          ).length > 0 && (
-            <div className="group relative">
-              <button className="demo-button inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold">
-                <Plus className="h-3.5 w-3.5" />
-                Add Income
-              </button>
-              <div className="invisible absolute right-0 top-full z-10 mt-1 min-w-[140px] rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] p-1.5 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
-                {SOURCE_OPTIONS.filter(
-                  (s) => !localEntries.some((e) => e.categoryName === s)
-                ).map((source) => (
-                  <button
-                    key={source}
-                    onClick={() => handleAdd(source)}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-xs font-medium text-[var(--sea-ink)] transition hover:bg-[var(--surface)]"
-                  >
-                    {source}
+          {showAddForm ? (
+            <button
+              type="button"
+              onClick={() => {
+                setShowAddForm(false);
+                setNewName('');
+                setNewAmount('');
+              }}
+              className="demo-button-secondary inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold"
+            >
+              <X className="h-3.5 w-3.5" /> Cancel
+            </button>
+          ) : (
+            <>
+              {SOURCE_OPTIONS.filter(
+                (s) => !localEntries.some((e) => e.categoryName === s)
+              ).length > 0 && (
+                <div className="group relative">
+                  <button className="demo-button-secondary inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold">
+                    <Plus className="h-3.5 w-3.5" />
+                    Preset
                   </button>
-                ))}
-              </div>
-            </div>
+                  <div className="invisible absolute right-0 top-full z-10 mt-1 min-w-[160px] rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] p-1.5 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
+                    {SOURCE_OPTIONS.filter(
+                      (s) => !localEntries.some((e) => e.categoryName === s)
+                    ).map((source) => (
+                      <button
+                        key={source}
+                        onClick={() => handleAdd(source)}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-xs font-medium text-[var(--sea-ink)] transition hover:bg-[var(--surface)]"
+                      >
+                        {source}
+                      </button>
+                    ))}
+                    {INCOME_PRESETS.filter(
+                      (p) => !localEntries.some((e) => e.categoryName === p.name)
+                    ).length > 0 && (
+                      <>
+                        <div className="my-1 border-t border-[var(--line)]" />
+                        {INCOME_PRESETS.filter(
+                          (p) => !localEntries.some((e) => e.categoryName === p.name)
+                        ).map((preset) => (
+                          <button
+                            key={preset.name}
+                            onClick={() => handleAddFromPreset(preset.name, preset.amount)}
+                            className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-xs font-medium text-[var(--sea-ink)] transition hover:bg-[var(--surface)]"
+                          >
+                            <span>{preset.name}</span>
+                            <span className="font-mono tabular-nums text-[var(--sea-ink-soft)]">
+                              {'₹'}{preset.amount.toLocaleString()}
+                            </span>
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowAddForm(true)}
+                className="demo-button inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Custom
+              </button>
+            </>
           )}
         </div>
       </div>
+
+      {/* Inline add form */}
+      <AnimatePresence>
+        {showAddForm && (
+          <motion.div
+            className="mb-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] p-4"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <label className="sr-only" htmlFor="inc-name">Income name</label>
+                <input
+                  id="inc-name"
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Income name"
+                  className="demo-input flex-1 rounded-xl px-3 py-2 text-xs font-medium"
+                />
+                <label className="sr-only" htmlFor="inc-amount">Income amount</label>
+                <div className="relative flex-[0.6]">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[var(--sea-ink-soft)]">
+                    {'₹'}
+                  </span>
+                  <input
+                    id="inc-amount"
+                    type="number"
+                    min={0}
+                    value={newAmount}
+                    onChange={(e) => setNewAmount(e.target.value)}
+                    placeholder="Amount"
+                    className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold font-mono tabular-nums"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setNewName('');
+                    setNewAmount('');
+                  }}
+                  className="demo-button-secondary inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold"
+                >
+                  <X className="h-3.5 w-3.5" /> Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddCustom}
+                  disabled={!newName.trim() || isNaN(parseFloat(newAmount)) || parseFloat(newAmount) < 0}
+                  className="demo-button inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold"
+                >
+                  <Check className="h-3.5 w-3.5" /> Add
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="space-y-2">
         {localEntries.map((entry, index) => (
@@ -232,7 +392,7 @@ export function IncomeSection({ entries, onUpdate }: IncomeSectionProps) {
                   min={0}
                   value={entry.planned || ''}
                   onChange={(e) => handlePlannedChange(entry.categoryId, e.target.value)}
-                  className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold tabular-nums"
+                  className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold font-mono tabular-nums"
                   placeholder="0"
                 />
               </div>
@@ -240,7 +400,7 @@ export function IncomeSection({ entries, onUpdate }: IncomeSectionProps) {
 
             <span
               className={cn(
-                'min-w-[64px] text-right text-xs font-semibold tabular-nums',
+                'min-w-[64px] text-right text-xs font-semibold font-mono tabular-nums',
                 entry.actual > 0
                   ? 'text-[var(--lagoon-deep)]'
                   : 'text-[var(--sea-ink-soft)]'
@@ -265,11 +425,11 @@ export function IncomeSection({ entries, onUpdate }: IncomeSectionProps) {
           Total Income
         </span>
         <div className="text-right">
-          <p className="text-sm font-bold text-[var(--lagoon-deep)] tabular-nums">
+          <p className="text-sm font-bold text-[var(--lagoon-deep)] font-mono tabular-nums">
             {formatCurrency(totalIncome)}
           </p>
           {totalActual !== totalIncome && (
-            <p className="text-[10px] text-[var(--sea-ink-soft)] tabular-nums">
+            <p className="text-[10px] text-[var(--sea-ink-soft)] font-mono tabular-nums">
               Actual: {formatCurrency(totalActual)}
             </p>
           )}

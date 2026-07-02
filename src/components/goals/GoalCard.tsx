@@ -118,7 +118,7 @@ export default function GoalCard({ goal, onEdit, onDelete }: GoalCardProps) {
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs">
           <span className="font-medium text-[var(--sea-ink-soft)]">Progress</span>
-          <span className="font-semibold tabular-nums" style={{ color: goal.color }}>
+          <span className="font-semibold font-mono tabular-nums" style={{ color: goal.color }}>
             {Math.round(percentage)}%
           </span>
         </div>

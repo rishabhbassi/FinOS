@@ -41,13 +41,13 @@ function CustomTooltip({
       <p className="mb-1 text-xs font-semibold text-[var(--sea-ink)]">{label}</p>
       <div className="flex items-center justify-between gap-6 text-xs">
         <span className="text-[var(--sea-ink-soft)]">Amount</span>
-        <span className="font-semibold tabular-nums text-[var(--sea-ink)]">
+        <span className="font-semibold font-mono tabular-nums text-[var(--sea-ink)]">
           {formatCurrency(entry.value)}
         </span>
       </div>
       <div className="flex items-center justify-between gap-6 text-xs">
         <span className="text-[var(--sea-ink-soft)]">% of Total</span>
-        <span className="font-semibold tabular-nums text-[var(--sea-ink)]">
+        <span className="font-semibold font-mono tabular-nums text-[var(--sea-ink)]">
           {entry.payload.percentage}%
         </span>
       </div>

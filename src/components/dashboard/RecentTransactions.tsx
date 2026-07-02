@@ -149,7 +149,7 @@ export default function RecentTransactions({
             <div className="flex flex-col items-end gap-0.5">
               <span
                 className={cn(
-                  'text-sm font-bold tabular-nums',
+                  'text-sm font-bold font-mono tabular-nums',
                   tx.type === 'income'
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : 'text-red-600 dark:text-red-400',

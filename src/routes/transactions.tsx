@@ -1,6 +1,6 @@
 // Finance OS - Transactions Page
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import {
@@ -13,13 +13,16 @@ import {
   Wallet,
   LayoutList,
   LayoutGrid,
+  X,
 } from 'lucide-react';
 import type { Transaction } from '@/types/database';
 import type { TransactionFilters } from '@/types/app';
 import { formatCurrency, startOfMonth, toDateString, getTodayDateString, cn } from '@/lib/utils';
 import { useTransactions } from '@/hooks/use-transactions';
-import { QuickEntry, TransactionForm, TransactionTable, FilterBar } from '@/components/transactions';
+import { TransactionForm, TransactionTable, FilterBar } from '@/components/transactions';
 import TransactionRow from '@/components/transactions/TransactionRow';
+import { useQuickEntryStore } from '@/stores/quick-entry-store';
+import { categoryQueries } from '@/lib/supabase/queries';
 
 export const Route = createFileRoute('/transactions')({
   component: TransactionsPage,
@@ -104,10 +107,13 @@ function TransactionsPage() {
     dateFrom: toDateString(startOfMonth()),
     dateTo: getTodayDateString(),
   });
-  const [quickEntryOpen, setQuickEntryOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | undefined>(undefined);
   const [viewMode, setViewMode] = useState<'table' | 'compact'>('table');
+  const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
+  const [categoryColors, setCategoryColors] = useState<Record<string, string>>({});
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const openQuickEntry = useQuickEntryStore((s) => s.openQuickEntry);
 
   const {
     transactions,
@@ -117,16 +123,28 @@ function TransactionsPage() {
     deleteTransaction,
   } = useTransactions(filters);
 
-  // Keyboard shortcuts
+  // Auto-refetch when QuickEntry closes (transaction was added)
+  const quickEntryOpen = useQuickEntryStore((s) => s.open);
+  const prevQuickEntryRef = useRef(quickEntryOpen);
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setQuickEntryOpen(true);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    if (prevQuickEntryRef.current && !quickEntryOpen) {
+      refetch();
+    }
+    prevQuickEntryRef.current = quickEntryOpen;
+  }, [quickEntryOpen, refetch]);
+
+  // Load categories to resolve UUID → name/color
+  useEffect(() => {
+    categoryQueries.list().then((cats) => {
+      const nameMap: Record<string, string> = {};
+      const colorMap: Record<string, string> = {};
+      cats.forEach((c) => {
+        nameMap[c.id] = c.name;
+        colorMap[c.id] = c.color;
+      });
+      setCategoryNames(nameMap);
+      setCategoryColors(colorMap);
+    }).catch(() => {});
   }, []);
 
   // Handlers
@@ -143,22 +161,43 @@ function TransactionsPage() {
   const handleDelete = useCallback(
     async (id: string) => {
       try {
+        setDeleteError(null);
         await deleteTransaction(id);
-      } catch {
-        // Error is handled by the hook
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Delete failed';
+        console.error('Failed to delete transaction:', msg);
+        setDeleteError(msg);
+        setTimeout(() => setDeleteError(null), 5000);
       }
     },
     [deleteTransaction],
   );
 
+  const handleDeleteMultiple = useCallback(
+    async (ids: string[]) => {
+      let failed = 0;
+      let lastErr = '';
+      for (const id of ids) {
+        try {
+          await deleteTransaction(id);
+        } catch (err) {
+          lastErr = err instanceof Error ? err.message : 'Delete failed';
+          console.error('Failed to delete transaction:', id, lastErr);
+          failed++;
+        }
+      }
+      if (failed > 0) {
+        setDeleteError(`Failed to delete ${failed} transaction(s): ${lastErr}`);
+        setTimeout(() => setDeleteError(null), 5000);
+        refetch();
+      }
+    },
+    [deleteTransaction, refetch],
+  );
+
   const handleFormSuccess = useCallback(() => {
     setFormOpen(false);
     setEditingTransaction(undefined);
-    refetch();
-  }, [refetch]);
-
-  const handleQuickSuccess = useCallback(() => {
-    setQuickEntryOpen(false);
     refetch();
   }, [refetch]);
 
@@ -217,7 +256,7 @@ function TransactionsPage() {
           {/* Quick Entry button */}
           <button
             type="button"
-            onClick={() => setQuickEntryOpen(true)}
+            onClick={openQuickEntry}
             className="demo-button !rounded-xl !py-2 text-xs"
             title="Quick Add (⌘K)"
           >
@@ -252,6 +291,25 @@ function TransactionsPage() {
         />
       </div>
 
+      {/* Delete error banner */}
+      {deleteError && (
+        <div className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+            <p className="m-0 text-sm font-medium text-red-600 dark:text-red-400">
+              {deleteError}
+            </p>
+            <button
+              type="button"
+              onClick={() => setDeleteError(null)}
+              className="ml-auto rounded-lg p-1 text-red-500/60 hover:bg-red-500/10 hover:text-red-500"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Error state */}
       {error && (
         <div className="mt-6">
@@ -284,7 +342,10 @@ function TransactionsPage() {
               transactions={transactions}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onDeleteMultiple={handleDeleteMultiple}
               loading={loading}
+              categoryNames={categoryNames}
+              categoryColors={categoryColors}
             />
           </div>
 
@@ -294,7 +355,10 @@ function TransactionsPage() {
               transactions={transactions}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onDeleteMultiple={handleDeleteMultiple}
               loading={loading}
+              categoryNames={categoryNames}
+              categoryColors={categoryColors}
             />
           </div>
 
@@ -336,6 +400,7 @@ function TransactionsPage() {
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     compact
+                    categoryNames={categoryNames}
                   />
                 ))
               )}
@@ -343,13 +408,6 @@ function TransactionsPage() {
           )}
         </div>
       )}
-
-      {/* Quick Entry Modal */}
-      <QuickEntry
-        open={quickEntryOpen}
-        onClose={() => setQuickEntryOpen(false)}
-        onSuccess={handleQuickSuccess}
-      />
 
       {/* Transaction Form Modal */}
       <TransactionForm

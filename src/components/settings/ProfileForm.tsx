@@ -15,8 +15,16 @@ const CURRENCY_OPTIONS = [
 ];
 
 interface ProfileFormProps {
-  profile: { name: string; currency: string; avatar_url?: string | null };
-  onSave: (profile: { name: string; currency: string; avatar_url?: string | null }) => void;
+  profile: {
+    name: string;
+    currency: string;
+    avatar_url?: string | null;
+  };
+  onSave: (profile: {
+    name: string;
+    currency: string;
+    avatar_url?: string | null;
+  }) => void;
 }
 
 export default function ProfileForm({ profile, onSave }: ProfileFormProps) {
@@ -159,6 +167,7 @@ export default function ProfileForm({ profile, onSave }: ProfileFormProps) {
             ))}
           </select>
         </div>
+
       </div>
 
       <div className="flex items-center gap-3">

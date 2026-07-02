@@ -239,16 +239,16 @@ function HoldingsList({
                     <span>{typeName}</span>
                   </span>
                 </td>
-                <td className="hidden tabular-nums md:table-cell">
+                <td className="hidden font-mono tabular-nums md:table-cell">
                   {formatCurrency(inv.amount_invested)}
                 </td>
-                <td className="tabular-nums font-semibold text-[var(--sea-ink)]">
+                <td className="font-mono tabular-nums font-semibold text-[var(--sea-ink)]">
                   {formatCurrency(inv.current_value)}
                 </td>
                 <td className="hidden md:table-cell">
                   <span
                     className={cn(
-                      'inline-flex items-center gap-1 tabular-nums font-semibold',
+                      'inline-flex items-center gap-1 font-mono tabular-nums font-semibold',
                       gainPct >= 0 ? 'text-green-600' : 'text-red-600',
                     )}
                   >

@@ -385,7 +385,7 @@ function AccountManager({
           )}
           <span
             className={cn(
-              'text-right text-sm font-bold tabular-nums',
+              'text-right text-sm font-bold font-mono tabular-nums',
               balanceColor(acc),
             )}
           >

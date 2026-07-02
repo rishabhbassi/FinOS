@@ -181,7 +181,7 @@ function StatTile({
         {icon}
         {label}
       </div>
-      <div className="tabular-nums text-lg font-bold text-[var(--sea-ink)] sm:text-xl">
+      <div className="font-mono tabular-nums text-lg font-bold text-[var(--sea-ink)] sm:text-xl">
         {formatted}
       </div>
     </div>

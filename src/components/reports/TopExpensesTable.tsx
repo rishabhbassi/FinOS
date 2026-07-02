@@ -109,7 +109,7 @@ export default function TopExpensesTable({
               return (
                 <tr key={transaction.id}>
                   <td className="text-xs text-[var(--sea-ink-soft)]">{index + 1}</td>
-                  <td className="whitespace-nowrap text-xs tabular-nums text-[var(--sea-ink-soft)]">
+                  <td className="whitespace-nowrap text-xs font-mono tabular-nums text-[var(--sea-ink-soft)]">
                     {formatDate(transaction.date)}
                   </td>
                   <td className="hidden max-w-[200px] truncate text-sm sm:table-cell">
@@ -118,7 +118,7 @@ export default function TopExpensesTable({
                   <td>
                     <span className="demo-pill text-[10px]">{catName}</span>
                   </td>
-                  <td className="text-right text-sm font-semibold tabular-nums text-red-500">
+                  <td className="text-right text-sm font-semibold font-mono tabular-nums text-red-500">
                     -{formatCurrency(Math.abs(transaction.amount))}
                   </td>
                 </tr>

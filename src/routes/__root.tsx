@@ -1,9 +1,12 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
+import { useEffect } from 'react';
+import { HeadContent, Scripts, createRootRoute, useRouter } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import Sidebar from '@/components/layouts/Sidebar';
 import MobileNav from '@/components/layouts/MobileNav';
 import AuthGuard from '@/components/layouts/AuthGuard';
+import QuickEntry from '@/components/transactions/QuickEntry';
+import { useQuickEntryStore } from '@/stores/quick-entry-store';
 
 import appCss from '@/styles.css?url';
 
@@ -34,6 +37,29 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const quickEntryOpen = useQuickEntryStore((s) => s.open);
+  const closeQuickEntry = useQuickEntryStore((s) => s.closeQuickEntry);
+  const openQuickEntry = useQuickEntryStore((s) => s.openQuickEntry);
+
+  // Global ⌘K handler — opens Quick Entry from any page
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        openQuickEntry();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [openQuickEntry]);
+
+  const handleQuickSuccess = () => {
+    closeQuickEntry();
+    // Re-fetch all route data so the current page reflects the new transaction
+    router.invalidate();
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -48,6 +74,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           </div>
           <MobileNav />
         </AuthGuard>
+
+        {/* Global Quick Entry — available from any page via ⌘K */}
+        <QuickEntry
+          open={quickEntryOpen}
+          onClose={closeQuickEntry}
+          onSuccess={handleQuickSuccess}
+        />
 
         <TanStackDevtools
           config={{

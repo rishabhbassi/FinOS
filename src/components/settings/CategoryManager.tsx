@@ -11,6 +11,7 @@ import {
   Check,
   X,
   ChevronUp,
+  ChevronDown,
   Lock,
   AlertCircle,
 } from 'lucide-react';
@@ -78,6 +79,7 @@ export const SYSTEM_CATEGORIES: Omit<Category, 'id' | 'user_id' | 'created_at'>[
   { name: 'Freelancing', type: 'income', icon: 'laptop', color: '#a855f7', is_system: true },
   { name: 'Interest', type: 'income', icon: 'landmark', color: '#f59e0b', is_system: true },
   { name: 'Other Income', type: 'income', icon: 'wallet', color: '#14b8a6', is_system: true },
+  { name: 'Other', type: 'income', icon: 'wallet', color: '#64748b', is_system: false },
   { name: 'Food', type: 'expense', icon: 'utensils', color: '#f97316', is_system: true },
   { name: 'Rent', type: 'expense', icon: 'home', color: '#64748b', is_system: true },
   { name: 'Electricity', type: 'expense', icon: 'zap', color: '#f59e0b', is_system: true },
@@ -88,6 +90,7 @@ export const SYSTEM_CATEGORIES: Omit<Category, 'id' | 'user_id' | 'created_at'>[
   { name: 'Medical', type: 'expense', icon: 'heartPulse', color: '#ec4899', is_system: true },
   { name: 'Travel', type: 'expense', icon: 'plane', color: '#3b82f6', is_system: true },
   { name: 'Education', type: 'expense', icon: 'bookOpen', color: '#14b8a6', is_system: true },
+  { name: 'Other', type: 'expense', icon: 'wallet', color: '#64748b', is_system: false },
 ];
 
 // ---------------------------------------------------------------------------
@@ -140,6 +143,8 @@ export default function CategoryManager({
   });
   const [addError, setAddError] = useState<string | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
+  const [incomeCollapsed, setIncomeCollapsed] = useState(false);
+  const [expenseCollapsed, setExpenseCollapsed] = useState(false);
 
   const { income, expense } = groupCategories(categories);
 
@@ -513,54 +518,96 @@ export default function CategoryManager({
 
       {/* Income section */}
       <div>
-        <h4 className="mb-3 text-sm font-bold text-[var(--sea-ink)]">
-          Income Categories ({income.length})
-        </h4>
-        <Reorder.Group
-          axis="y"
-          values={income}
-          onReorder={() => {
-            /* reorder handled externally */
-          }}
-          className="space-y-2"
-          as="div"
+        <button
+          type="button"
+          onClick={() => setIncomeCollapsed((p) => !p)}
+          className="mb-3 flex w-full items-center justify-between text-left"
         >
-          <AnimatePresence mode="popLayout">
-            {income.length === 0
-              ? renderEmptyState('income')
-              : income.map((cat) => (
-                  <Reorder.Item key={cat.id} value={cat} as="span">
-                    {renderCategoryRow(cat)}
-                  </Reorder.Item>
-                ))}
-          </AnimatePresence>
-        </Reorder.Group>
+          <h4 className="text-sm font-bold text-[var(--sea-ink)]">
+            Income Categories ({income.length})
+          </h4>
+          {incomeCollapsed ? (
+            <ChevronDown className="h-4 w-4 text-[var(--sea-ink-soft)]" />
+          ) : (
+            <ChevronUp className="h-4 w-4 text-[var(--sea-ink-soft)]" />
+          )}
+        </button>
+        <AnimatePresence initial={false}>
+          {!incomeCollapsed && (
+            <motion.div
+              key="income-list"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Reorder.Group
+                axis="y"
+                values={income}
+                onReorder={() => {/* reorder handled externally */}}
+                className="space-y-2"
+                as="div"
+              >
+                <AnimatePresence mode="popLayout">
+                  {income.length === 0
+                    ? renderEmptyState('income')
+                    : income.map((cat) => (
+                        <Reorder.Item key={cat.id} value={cat} as="span">
+                          {renderCategoryRow(cat)}
+                        </Reorder.Item>
+                      ))}
+                </AnimatePresence>
+              </Reorder.Group>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Expense section */}
       <div>
-        <h4 className="mb-3 text-sm font-bold text-[var(--sea-ink)]">
-          Expense Categories ({expense.length})
-        </h4>
-        <Reorder.Group
-          axis="y"
-          values={expense}
-          onReorder={() => {
-            /* reorder handled externally */
-          }}
-          className="space-y-2"
-          as="div"
+        <button
+          type="button"
+          onClick={() => setExpenseCollapsed((p) => !p)}
+          className="mb-3 flex w-full items-center justify-between text-left"
         >
-          <AnimatePresence mode="popLayout">
-            {expense.length === 0
-              ? renderEmptyState('expense')
-              : expense.map((cat) => (
-                  <Reorder.Item key={cat.id} value={cat} as="span">
-                    {renderCategoryRow(cat)}
-                  </Reorder.Item>
-                ))}
-          </AnimatePresence>
-        </Reorder.Group>
+          <h4 className="text-sm font-bold text-[var(--sea-ink)]">
+            Expense Categories ({expense.length})
+          </h4>
+          {expenseCollapsed ? (
+            <ChevronDown className="h-4 w-4 text-[var(--sea-ink-soft)]" />
+          ) : (
+            <ChevronUp className="h-4 w-4 text-[var(--sea-ink-soft)]" />
+          )}
+        </button>
+        <AnimatePresence initial={false}>
+          {!expenseCollapsed && (
+            <motion.div
+              key="expense-list"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <Reorder.Group
+                axis="y"
+                values={expense}
+                onReorder={() => {/* reorder handled externally */}}
+                className="space-y-2"
+                as="div"
+              >
+                <AnimatePresence mode="popLayout">
+                  {expense.length === 0
+                    ? renderEmptyState('expense')
+                    : expense.map((cat) => (
+                        <Reorder.Item key={cat.id} value={cat} as="span">
+                          {renderCategoryRow(cat)}
+                        </Reorder.Item>
+                      ))}
+                </AnimatePresence>
+              </Reorder.Group>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

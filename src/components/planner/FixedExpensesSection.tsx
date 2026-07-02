@@ -277,7 +277,7 @@ export function FixedExpensesSection({ entries, onUpdate }: FixedExpensesSection
                         className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-xs font-medium text-[var(--sea-ink)] transition hover:bg-[var(--surface)]"
                       >
                         <span>{preset.name}</span>
-                        <span className="tabular-nums text-[var(--sea-ink-soft)]">
+                        <span className="font-mono tabular-nums text-[var(--sea-ink-soft)]">
                           {formatCurrency(preset.amount)}
                         </span>
                       </button>
@@ -350,7 +350,7 @@ export function FixedExpensesSection({ entries, onUpdate }: FixedExpensesSection
                   min={0}
                   value={entry.planned || ''}
                   onChange={(e) => handlePlannedChange(entry.categoryId, e.target.value)}
-                  className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold tabular-nums"
+                  className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold font-mono tabular-nums"
                   placeholder="0"
                 />
               </div>
@@ -377,7 +377,7 @@ export function FixedExpensesSection({ entries, onUpdate }: FixedExpensesSection
         <span className="text-xs font-semibold text-[var(--sea-ink)]">
           Total Fixed Expenses
         </span>
-        <span className="text-sm font-bold text-[var(--sea-ink)] tabular-nums">
+        <span className="text-sm font-bold text-[var(--sea-ink)] font-mono tabular-nums">
           {formatCurrency(totalFixed)}
         </span>
       </div>
@@ -433,7 +433,7 @@ function InlineAddForm({
             value={amount}
             onChange={(e) => onAmountChange(e.target.value)}
             placeholder="Amount"
-            className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold tabular-nums"
+            className="demo-input w-full rounded-xl py-2 pl-7 pr-3 text-xs font-semibold font-mono tabular-nums"
           />
         </div>
       </div>

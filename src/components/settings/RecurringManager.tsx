@@ -11,6 +11,7 @@ import {
   X,
   CalendarDays,
   Repeat,
+  Sparkles,
   AlertCircle,
 } from 'lucide-react';
 import { cn, formatCurrency, formatDate } from '@/lib/utils';
@@ -64,6 +65,23 @@ const ADD_FORM_DEFAULTS: AddFormState = {
   day_of_month: '1',
   is_active: true,
 };
+
+// Common recurring expense presets
+const RECURRING_PRESETS: {
+  name: string;
+  category: string;
+  amount: number;
+  frequency: RecurringExpense['frequency'];
+  day: number;
+}[] = [
+  { name: 'Netflix', category: 'Subscription', amount: 650, frequency: 'monthly', day: 5 },
+  { name: 'Spotify', category: 'Subscription', amount: 189, frequency: 'monthly', day: 5 },
+  { name: 'YouTube Premium', category: 'Subscription', amount: 139, frequency: 'monthly', day: 5 },
+  { name: 'Gym Membership', category: 'Misc', amount: 2000, frequency: 'monthly', day: 1 },
+  { name: 'Rent', category: 'Rent', amount: 21000, frequency: 'monthly', day: 1 },
+  { name: 'Insurance Premium', category: 'Insurance', amount: 5000, frequency: 'yearly', day: 15 },
+  { name: 'Amazon Prime', category: 'Subscription', amount: 1499, frequency: 'yearly', day: 1 },
+];
 
 // ---------------------------------------------------------------------------
 // Props
@@ -152,6 +170,22 @@ export default function RecurringManager({
     setAddForm(ADD_FORM_DEFAULTS);
     setAddError(null);
     setShowAddForm(false);
+  }
+
+  // ---- Apply a preset ----
+  function applyPreset(
+    preset: (typeof RECURRING_PRESETS)[number],
+  ) {
+    setAddForm({
+      name: preset.name,
+      category: preset.category,
+      amount: String(preset.amount),
+      frequency: preset.frequency,
+      day_of_month: String(preset.day),
+      is_active: true,
+    });
+    setShowAddForm(true);
+    setAddError(null);
   }
 
   // ---- Validate form ----
@@ -370,7 +404,7 @@ export default function RecurringManager({
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
-          <span className="text-right text-sm font-bold tabular-nums text-[var(--sea-ink)]">
+          <span className="text-right text-sm font-bold font-mono tabular-nums text-[var(--sea-ink)]">
             {formatCurrency(expense.amount)}
           </span>
 
@@ -432,6 +466,34 @@ export default function RecurringManager({
             <Plus className="h-4 w-4" /> Add Recurring
           </button>
         </div>
+
+        {/* Presets */}
+        <div className="rounded-xl border border-[var(--line)] p-4">
+          <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold text-[var(--sea-ink-soft)]">
+            <Sparkles className="h-3.5 w-3.5" />
+            Quick-add common recurring expenses
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {RECURRING_PRESETS.map((preset) => {
+              const exists = expenses.some(
+                (e) => e.name.toLowerCase() === preset.name.toLowerCase(),
+              );
+              if (exists) return null;
+              return (
+                <button
+                  key={preset.name}
+                  type="button"
+                  onClick={() => applyPreset(preset)}
+                  className="demo-button-secondary inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                >
+                  <Plus className="h-3 w-3" />
+                  {preset.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="rounded-xl border-2 border-dashed border-[var(--line)] p-10 text-center">
           <Repeat className="mx-auto h-10 w-10 text-[var(--sea-ink-soft)]/50" />
           <p className="mt-2 text-sm font-medium text-[var(--sea-ink-soft)]">
@@ -445,17 +507,46 @@ export default function RecurringManager({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-[var(--sea-ink-soft)]">
           Manage your recurring bills, subscriptions, and periodic payments.
         </p>
-        <button
-          type="button"
-          onClick={() => setShowAddForm((prev) => !prev)}
-          className="demo-button text-sm"
-        >
-          <Plus className="h-4 w-4" /> {showAddForm ? 'Close' : 'Add'}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Presets dropdown */}
+          {!showAddForm && (
+            <div className="group relative">
+              <button
+                type="button"
+                className="demo-button-secondary inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                Presets
+              </button>
+              <div className="invisible absolute right-0 top-full z-10 mt-1 max-h-64 w-52 overflow-y-auto rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] p-1.5 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100">
+                {RECURRING_PRESETS.map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => applyPreset(preset)}
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-left text-xs font-medium text-[var(--sea-ink)] transition hover:bg-[var(--surface)]"
+                  >
+                    <span>{preset.name}</span>
+                    <span className="font-mono tabular-nums text-[var(--sea-ink-soft)]">
+                      ₹{preset.amount}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowAddForm((prev) => !prev)}
+            className="demo-button text-sm"
+          >
+            <Plus className="h-4 w-4" /> {showAddForm ? 'Close' : 'Add'}
+          </button>
+        </div>
       </div>
 
       {/* Add form */}

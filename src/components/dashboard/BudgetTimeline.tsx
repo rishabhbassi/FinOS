@@ -149,7 +149,7 @@ export default function BudgetTimeline({
 
               <span
                 className={cn(
-                  'w-16 text-right text-xs font-semibold tabular-nums',
+                  'w-16 text-right text-xs font-semibold font-mono tabular-nums',
                   isOver
                     ? 'text-red-500'
                     : 'text-[var(--sea-ink-soft)]',

@@ -35,6 +35,8 @@ interface TransactionTableProps {
   onDelete: (id: string) => void;
   onDeleteMultiple?: (ids: string[]) => void;
   loading?: boolean;
+  categoryNames?: Record<string, string>;
+  categoryColors?: Record<string, string>;
 }
 
 // Empty state
@@ -80,41 +82,11 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 // Page size options
 const PAGE_SIZES = [10, 20, 50, 100];
 
-const CATEGORY_COLORS: Record<string, string> = {
-  'cat-food': '#ef4444',
-  'cat-groceries': '#dc2626',
-  'cat-fuel': '#f97316',
-  'cat-rent': '#eab308',
-  'cat-electricity': '#a855f7',
-  'cat-internet': '#6366f1',
-  'cat-shopping': '#ec4899',
-  'cat-entertainment': '#f43f5e',
-  'cat-medical': '#e11d48',
-  'cat-travel': '#0ea5e9',
-  'cat-education': '#06b6d4',
-  'cat-gift': '#d946ef',
-  'cat-subscription': '#8b5cf6',
-  'cat-bills': '#7c3aed',
-  'cat-emi': '#f59e0b',
-  'cat-insurance': '#10b981',
-  'cat-misc': '#6b7280',
-  'cat-salary': '#22c55e',
-  'cat-bonus': '#16a34a',
-  'cat-freelancing': '#15803d',
-  'cat-refund': '#65a30d',
-  'cat-interest': '#ca8a04',
-  'cat-dividend': '#d97706',
-  'cat-other-income': '#a16207',
-  'cat-transfer': '#3b82f6',
-};
 
-function getCategoryName(catId: string | null): string {
+function getCategoryName(catId: string | null, categoryNames?: Record<string, string>): string {
   if (!catId) return 'Unknown';
-  return catId
-    .replace('cat-', '')
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
+  if (categoryNames && categoryNames[catId]) return categoryNames[catId];
+  return 'Unknown';
 }
 
 export default function TransactionTable({
@@ -123,6 +95,8 @@ export default function TransactionTable({
   onDelete,
   onDeleteMultiple,
   loading = false,
+  categoryNames,
+  categoryColors,
 }: TransactionTableProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'date', desc: true }]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -186,16 +160,16 @@ export default function TransactionTable({
         header: 'Description',
         cell: ({ row }) => {
           const tx = row.original;
-          const name = tx.description || getCategoryName(tx.category_id);
+          const name = tx.description || getCategoryName(tx.category_id, categoryNames);
           return (
             <div className="flex items-center gap-2">
               <span
                 className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-xs"
-                style={{ backgroundColor: (CATEGORY_COLORS[tx.category_id ?? ''] || '#6b7280') + '20' }}
+                style={{ backgroundColor: (categoryColors?.[tx.category_id ?? ''] || '#6b7280') + '20' }}
               >
                 <span
                   className="h-2 w-2 rounded-full"
-                  style={{ backgroundColor: CATEGORY_COLORS[tx.category_id ?? ''] || '#6b7280' }}
+                  style={{ backgroundColor: categoryColors?.[tx.category_id ?? ''] || '#6b7280' }}
                 />
               </span>
               <div className="min-w-0">
@@ -218,7 +192,7 @@ export default function TransactionTable({
         header: 'Category',
         cell: ({ row }) => (
           <span className="text-sm text-[var(--sea-ink-soft)]">
-            {getCategoryName(row.original.category_id)}
+            {getCategoryName(row.original.category_id, categoryNames)}
           </span>
         ),
       },
@@ -248,7 +222,7 @@ export default function TransactionTable({
           return (
             <span
               className={cn(
-                'block text-right text-sm font-bold tabular-nums',
+                'block text-right text-sm font-bold font-mono tabular-nums',
                 isIncome
                   ? 'text-emerald-600 dark:text-emerald-400'
                   : isExpense
@@ -291,12 +265,13 @@ export default function TransactionTable({
         enableSorting: false,
       },
     ],
-    [onEdit, onDelete],
+    [onEdit, onDelete, categoryNames, categoryColors],
   );
 
   const table = useReactTable({
     data: transactions,
     columns,
+    getRowId: (row) => row.id, // Use actual transaction UUID as row ID (not row index)
     state: {
       sorting,
       rowSelection,

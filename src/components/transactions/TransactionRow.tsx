@@ -14,45 +14,14 @@ interface TransactionRowProps {
   onEdit: (t: Transaction) => void;
   onDelete: (id: string) => void;
   compact?: boolean;
+  categoryNames?: Record<string, string>;
 }
 
-// Category icon mapping
-const CATEGORY_ICONS: Record<string, string> = {
-  food: '\u{1F354}',
-  groceries: '\u{1F6D2}',
-  fuel: '⛽',
-  rent: '\u{1F3E0}',
-  electricity: '⚡',
-  internet: '\u{1F310}',
-  shopping: '\u{1F6CD}️',
-  entertainment: '\u{1F3AC}',
-  medical: '\u{1F3E5}',
-  travel: '✈️',
-  education: '\u{1F393}',
-  gift: '\u{1F381}',
-  subscription: '\u{1F504}',
-  bills: '\u{1F4C4}',
-  emi: '\u{1F4B3}',
-  insurance: '\u{1F6E1}️',
-  misc: '\u{1F4CC}',
-  salary: '\u{1F4B0}',
-  bonus: '\u{1F3AF}',
-  freelancing: '\u{1F4BB}',
-  refund: '↩️',
-  interest: '\u{1F4C8}',
-  dividend: '\u{1F4CA}',
-  'other income': '➕',
-};
-
-function getCategoryName(categoryId: string | null): string {
+function getCategoryName(categoryId: string | null, categoryNames?: Record<string, string>): string {
   if (!categoryId) return 'Uncategorized';
-  return categoryId.replace('cat-', '').replace(/-/g, ' ');
-}
-
-function getCategoryIcon(categoryId: string | null): string {
-  if (!categoryId) return '\u{1F4CC}';
-  const key = categoryId.replace('cat-', '').replace(/-/g, ' ');
-  return CATEGORY_ICONS[key] || '\u{1F4CC}';
+  if (categoryNames && categoryNames[categoryId]) return categoryNames[categoryId];
+  // Fallback: try to extract a readable name from the UUID-based category_id
+  return 'Unknown';
 }
 
 export default function TransactionRow({
@@ -60,7 +29,11 @@ export default function TransactionRow({
   onEdit,
   onDelete,
   compact = false,
+  categoryNames,
 }: TransactionRowProps) {
+  const catName = transaction.category_id
+    ? getCategoryName(transaction.category_id, categoryNames)
+    : 'Uncategorized';
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -89,12 +62,12 @@ export default function TransactionRow({
                     : 'bg-blue-100 dark:bg-blue-900/30',
               )}
             >
-              <span>{getCategoryIcon(transaction.category_id)}</span>
+              <span>{isExpense ? '💳' : isIncome ? '💰' : '🔄'}</span>
             </div>
 
             <div>
               <p className="m-0 text-sm font-semibold text-[var(--sea-ink)]">
-                {transaction.description || getCategoryName(transaction.category_id)}
+                {transaction.description || catName}
               </p>
               <p className="m-0 text-xs text-[var(--sea-ink-soft)]">
                 {formatDate(transaction.date)}
@@ -103,8 +76,16 @@ export default function TransactionRow({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className={cn('text-base font-bold tabular-nums', amountColor)}>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => onDelete(transaction.id)}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--sea-ink-soft)]/50 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+              aria-label={`Delete ${transaction.description || 'transaction'}`}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+            <span className={cn('text-base font-bold font-mono tabular-nums', amountColor)}>
               {isExpense ? '- ' : isIncome ? '+ ' : ''}
               {formatCurrency(Math.abs(displayAmount))}
             </span>
@@ -122,10 +103,10 @@ export default function TransactionRow({
 
       <td>
         <div className="flex items-center gap-2">
-          <span>{getCategoryIcon(transaction.category_id)}</span>
+          <span>{isExpense ? '💳' : isIncome ? '💰' : '🔄'}</span>
           <div>
             <p className="m-0 text-sm font-medium text-[var(--sea-ink)]">
-              {transaction.description || getCategoryName(transaction.category_id)}
+              {transaction.description || catName}
             </p>
             {transaction.merchant && (
               <p className="m-0 text-xs text-[var(--sea-ink-soft)]">{transaction.merchant}</p>
@@ -135,7 +116,7 @@ export default function TransactionRow({
       </td>
 
       <td className="text-sm text-[var(--sea-ink-soft)]">
-        {getCategoryName(transaction.category_id)}
+        {catName}
       </td>
 
       <td className="text-sm text-[var(--sea-ink-soft)]">
@@ -156,7 +137,7 @@ export default function TransactionRow({
       </td>
 
       <td className="text-right">
-        <span className={cn('text-sm font-bold tabular-nums', amountColor)}>
+        <span className={cn('text-sm font-bold font-mono tabular-nums', amountColor)}>
           {isIncome ? '+' : isExpense ? '-' : ''}
           {formatCurrency(Math.abs(displayAmount))}
         </span>
