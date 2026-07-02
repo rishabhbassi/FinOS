@@ -63,18 +63,26 @@ function LoadingSkeleton() {
   );
 }
 
-function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+function ErrorState({ message, onRetry, onAddGoal }: { message: string; onRetry?: () => void; onAddGoal?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
       <AlertCircle className="h-10 w-10 text-red-500" />
       <p className="text-lg font-semibold text-red-600">Failed to load goals</p>
       <p className="max-w-md text-sm text-[var(--sea-ink-soft)]">{message}</p>
-      {onRetry && (
-        <button onClick={onRetry} className="demo-button mt-1">
-          <RefreshCw className="h-4 w-4" />
-          Retry
-        </button>
-      )}
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+        {onRetry && (
+          <button onClick={onRetry} className="demo-button">
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </button>
+        )}
+        {onAddGoal && (
+          <button onClick={onAddGoal} className="demo-button-secondary">
+            <Plus className="h-4 w-4" />
+            Create Goal
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -109,7 +117,7 @@ function GoalsGrid({
   onEditGoal,
   onDeleteGoal,
 }: GoalsGridProps) {
-  if (error) return <ErrorState message={error} onRetry={onRetry} />;
+  if (error) return <ErrorState message={error} onRetry={onRetry} onAddGoal={onAddGoal} />;
   if (loading) return <LoadingSkeleton />;
 
   // Empty state with no goals — hide grid, show CTA

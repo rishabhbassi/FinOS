@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -10,6 +10,8 @@ import {
   Palette,
   AlertCircle,
   RefreshCw,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Account, Category, RecurringExpense } from '@/types/database';
@@ -132,21 +134,6 @@ function AccountsSkeleton() {
 }
 
 // ---------------------------------------------------------------------------
-// Error display
-// ---------------------------------------------------------------------------
-function SettingsError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-4 py-8 text-center">
-      <AlertCircle className="h-8 w-8 text-red-500" />
-      <p className="text-sm text-red-600">{message}</p>
-      <button type="button" onClick={onRetry} className="demo-button text-sm">
-        <RefreshCw className="h-4 w-4" /> Retry
-      </button>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Settings Page
 // ---------------------------------------------------------------------------
 function SettingsPage() {
@@ -164,6 +151,16 @@ function SettingsPage() {
   const syncRecurring = useRecurringStore((s) => s.syncWithSupabase);
 
   const authUserId = useAuthStore((s) => s.user?.id);
+
+  // Toast state
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = useCallback((type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const [profile, setProfile] = useState<{
     name: string;
@@ -244,16 +241,24 @@ function SettingsPage() {
       setProfile({ name: updated.name, currency: updated.currency, avatar_url: updated.avatar_url ?? null });
       if (authUserId) {
         try {
-          await supabase
+          const { error } = await supabase
             .from('profiles')
             .update({ full_name: updated.name, currency: updated.currency })
             .eq('id', authUserId);
-        } catch {
-          // profile save non-critical
+          if (error) {
+            showToast('error', `Failed to save profile: ${error.message}`);
+          } else {
+            showToast('success', 'Profile saved successfully');
+          }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Unknown error';
+          showToast('error', `Failed to save profile: ${msg}`);
         }
+      } else {
+        showToast('success', 'Profile updated (offline)');
       }
     },
-    [authUserId],
+    [authUserId, showToast],
   );
 
   // ---- Category handlers ----
@@ -406,7 +411,25 @@ function SettingsPage() {
             {categoriesLoading ? (
               <CategoriesSkeleton />
             ) : categoriesError ? (
-              <SettingsError message={categoriesError} onRetry={fetchCategories} />
+              <>
+                <div className="mb-4 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>Could not load categories. You can still add new ones.</span>
+                  <button
+                    type="button"
+                    onClick={fetchCategories}
+                    className="ml-auto flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/40"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Retry
+                  </button>
+                </div>
+                <CategoryManager
+                  categories={[]}
+                  onAdd={handleCategoryAdd}
+                  onUpdate={handleCategoryUpdate}
+                  onDelete={handleCategoryDelete}
+                />
+              </>
             ) : (
               <CategoryManager
                 categories={categories}
@@ -424,7 +447,25 @@ function SettingsPage() {
             {accountsLoading ? (
               <AccountsSkeleton />
             ) : accountsError ? (
-              <SettingsError message={accountsError} onRetry={fetchAccounts} />
+              <>
+                <div className="mb-4 flex items-center gap-2 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>Could not load accounts. You can still add new ones.</span>
+                  <button
+                    type="button"
+                    onClick={fetchAccounts}
+                    className="ml-auto flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/40"
+                  >
+                    <RefreshCw className="h-3 w-3" /> Retry
+                  </button>
+                </div>
+                <AccountManager
+                  accounts={[]}
+                  onAdd={handleAccountAdd}
+                  onUpdate={handleAccountUpdate}
+                  onDelete={handleAccountDelete}
+                />
+              </>
             ) : (
               <AccountManager
                 accounts={accounts}
@@ -516,6 +557,28 @@ function SettingsPage() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Toast notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-6 left-1/2 z-[60] -translate-x-1/2 rounded-xl border border-[var(--line)] bg-[var(--surface-strong)] px-5 py-3 text-sm font-semibold text-[var(--sea-ink)] shadow-lg backdrop-blur-md"
+          >
+            <div className="flex items-center gap-2">
+              {toast.type === 'success' ? (
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              ) : (
+                <XCircle className="h-4 w-4 text-red-500" />
+              )}
+              {toast.message}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

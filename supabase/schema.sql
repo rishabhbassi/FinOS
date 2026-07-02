@@ -5,6 +5,12 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Grant table permissions to roles
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, authenticated, service_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+
 -- 1. Profiles (extends Supabase Auth)
 CREATE TABLE profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,

@@ -31,66 +31,90 @@ import { transactionQueries } from '@/lib/supabase/queries';
 import { getCategories } from '@/actions/categories';
 import { formatCurrency, getTodayDateString, cn } from '@/lib/utils';
 
-// Keyword-to-category mapping for auto-categorization
-const KEYWORD_MAP: Record<string, { categoryId: string; categoryName: string }> = {
-  coffee: { categoryId: 'cat-food', categoryName: 'Food' },
-  tea: { categoryId: 'cat-food', categoryName: 'Food' },
-  lunch: { categoryId: 'cat-food', categoryName: 'Food' },
-  dinner: { categoryId: 'cat-food', categoryName: 'Food' },
-  breakfast: { categoryId: 'cat-food', categoryName: 'Food' },
-  food: { categoryId: 'cat-food', categoryName: 'Food' },
-  pizza: { categoryId: 'cat-food', categoryName: 'Food' },
-  burger: { categoryId: 'cat-food', categoryName: 'Food' },
-  restaurant: { categoryId: 'cat-food', categoryName: 'Food' },
-  cafe: { categoryId: 'cat-food', categoryName: 'Food' },
-  grocery: { categoryId: 'cat-groceries', categoryName: 'Groceries' },
-  groceries: { categoryId: 'cat-groceries', categoryName: 'Groceries' },
-  supermarket: { categoryId: 'cat-groceries', categoryName: 'Groceries' },
-  fuel: { categoryId: 'cat-fuel', categoryName: 'Fuel' },
-  petrol: { categoryId: 'cat-fuel', categoryName: 'Fuel' },
-  diesel: { categoryId: 'cat-fuel', categoryName: 'Fuel' },
-  gas: { categoryId: 'cat-fuel', categoryName: 'Fuel' },
-  rent: { categoryId: 'cat-rent', categoryName: 'Rent' },
-  shopping: { categoryId: 'cat-shopping', categoryName: 'Shopping' },
-  clothes: { categoryId: 'cat-shopping', categoryName: 'Shopping' },
-  shoes: { categoryId: 'cat-shopping', categoryName: 'Shopping' },
-  amazon: { categoryId: 'cat-shopping', categoryName: 'Shopping' },
-  movie: { categoryId: 'cat-entertainment', categoryName: 'Entertainment' },
-  movies: { categoryId: 'cat-entertainment', categoryName: 'Entertainment' },
-  netflix: { categoryId: 'cat-subscription', categoryName: 'Subscription' },
-  spotify: { categoryId: 'cat-subscription', categoryName: 'Subscription' },
-  subscription: { categoryId: 'cat-subscription', categoryName: 'Subscription' },
-  uber: { categoryId: 'cat-travel', categoryName: 'Travel' },
-  cab: { categoryId: 'cat-travel', categoryName: 'Travel' },
-  taxi: { categoryId: 'cat-travel', categoryName: 'Travel' },
-  travel: { categoryId: 'cat-travel', categoryName: 'Travel' },
-  bus: { categoryId: 'cat-travel', categoryName: 'Travel' },
-  train: { categoryId: 'cat-travel', categoryName: 'Travel' },
-  flight: { categoryId: 'cat-travel', categoryName: 'Travel' },
-  medical: { categoryId: 'cat-medical', categoryName: 'Medical' },
-  doctor: { categoryId: 'cat-medical', categoryName: 'Medical' },
-  medicine: { categoryId: 'cat-medical', categoryName: 'Medical' },
-  hospital: { categoryId: 'cat-medical', categoryName: 'Medical' },
-  gym: { categoryId: 'cat-medical', categoryName: 'Medical' },
-  gift: { categoryId: 'cat-gift', categoryName: 'Gift' },
-  present: { categoryId: 'cat-gift', categoryName: 'Gift' },
-  bill: { categoryId: 'cat-bills', categoryName: 'Bills' },
-  electricity: { categoryId: 'cat-electricity', categoryName: 'Electricity' },
-  wifi: { categoryId: 'cat-internet', categoryName: 'Internet' },
-  internet: { categoryId: 'cat-internet', categoryName: 'Internet' },
-  mobile: { categoryId: 'cat-bills', categoryName: 'Bills' },
-  phone: { categoryId: 'cat-bills', categoryName: 'Bills' },
-  emi: { categoryId: 'cat-emi', categoryName: 'EMI' },
-  loan: { categoryId: 'cat-emi', categoryName: 'EMI' },
-  insurance: { categoryId: 'cat-insurance', categoryName: 'Insurance' },
-  course: { categoryId: 'cat-education', categoryName: 'Education' },
-  education: { categoryId: 'cat-education', categoryName: 'Education' },
-  udemy: { categoryId: 'cat-education', categoryName: 'Education' },
-  book: { categoryId: 'cat-education', categoryName: 'Education' },
-  salary: { categoryId: 'cat-salary', categoryName: 'Salary' },
-  freelance: { categoryId: 'cat-freelancing', categoryName: 'Freelancing' },
-  bonus: { categoryId: 'cat-bonus', categoryName: 'Bonus' },
-  transfer: { categoryId: 'cat-transfer', categoryName: 'Transfer' },
+// Map category icon names (as stored in DB) to Quick Entry icon components
+const QUICK_ICON_MAP: Record<string, React.ReactNode> = {
+  utensils: <UtensilsCrossed className="h-4 w-4" />,
+  car: <Fuel className="h-4 w-4" />,
+  shoppingBag: <ShoppingBag className="h-4 w-4" />,
+  film: <Clapperboard className="h-4 w-4" />,
+  heartPulse: <HeartPulse className="h-4 w-4" />,
+  plane: <Plane className="h-4 w-4" />,
+  bookOpen: <GraduationCap className="h-4 w-4" />,
+  home: <Building className="h-4 w-4" />,
+  zap: <Zap className="h-4 w-4" />,
+  wifi: <Wifi className="h-4 w-4" />,
+  gift: <Gift className="h-4 w-4" />,
+  wallet: <Ellipsis className="h-4 w-4" />,
+  briefcase: <CreditCard className="h-4 w-4" />,
+  circleDollarSign: <Smartphone className="h-4 w-4" />,
+  laptop: <ShoppingBasket className="h-4 w-4" />,
+  landmark: <Building className="h-4 w-4" />,
+};
+
+function QuickEntryIcon({ name }: { name: string }) {
+  return QUICK_ICON_MAP[name] ?? <Ellipsis className="h-4 w-4" />;
+}
+
+// Keyword-to-category mapping for auto-categorization (maps to category name, not hardcoded IDs)
+const KEYWORD_MAP: Record<string, string> = {
+  coffee: 'Food',
+  tea: 'Food',
+  lunch: 'Food',
+  dinner: 'Food',
+  breakfast: 'Food',
+  food: 'Food',
+  pizza: 'Food',
+  burger: 'Food',
+  restaurant: 'Food',
+  cafe: 'Food',
+  grocery: 'Groceries',
+  groceries: 'Groceries',
+  supermarket: 'Groceries',
+  fuel: 'Fuel',
+  petrol: 'Fuel',
+  diesel: 'Fuel',
+  gas: 'Fuel',
+  rent: 'Rent',
+  shopping: 'Shopping',
+  clothes: 'Shopping',
+  shoes: 'Shopping',
+  amazon: 'Shopping',
+  movie: 'Entertainment',
+  movies: 'Entertainment',
+  netflix: 'Subscription',
+  spotify: 'Subscription',
+  subscription: 'Subscription',
+  uber: 'Travel',
+  cab: 'Travel',
+  taxi: 'Travel',
+  travel: 'Travel',
+  bus: 'Travel',
+  train: 'Travel',
+  flight: 'Travel',
+  medical: 'Medical',
+  doctor: 'Medical',
+  medicine: 'Medical',
+  hospital: 'Medical',
+  gym: 'Medical',
+  gift: 'Gift',
+  present: 'Gift',
+  bill: 'Bills',
+  electricity: 'Electricity',
+  wifi: 'Internet',
+  internet: 'Internet',
+  mobile: 'Bills',
+  phone: 'Bills',
+  emi: 'EMI',
+  loan: 'EMI',
+  insurance: 'Insurance',
+  course: 'Education',
+  education: 'Education',
+  udemy: 'Education',
+  book: 'Education',
+  salary: 'Salary',
+  freelance: 'Freelancing',
+  bonus: 'Bonus',
+  transfer: 'Transfer',
 };
 
 const quickEntrySchema = z.object({
@@ -109,8 +133,8 @@ export default function QuickEntry({ open, onClose, onSuccess }: QuickEntryProps
   const [step, setStep] = useState<'input' | 'confirm'>('input');
   const [parsedDescription, setParsedDescription] = useState('');
   const [parsedAmount, setParsedAmount] = useState(0);
-  const [parsedCategoryId, setParsedCategoryId] = useState('cat-food');
-  const [parsedCategoryName, setParsedCategoryName] = useState('Food');
+  const [parsedCategoryId, setParsedCategoryId] = useState<string | null>(null);
+  const [parsedCategoryName, setParsedCategoryName] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -156,22 +180,48 @@ export default function QuickEntry({ open, onClose, onSuccess }: QuickEntryProps
     return () => window.removeEventListener('keydown', handler);
   }, [open, onClose]);
 
+  // Find a category from the loaded list by name, case-insensitive
+  const findCategoryByName = useCallback(
+    (name: string): { id: string | null; name: string } => {
+      const cat = categories.find(
+        (c) => c.name.toLowerCase() === name.toLowerCase(),
+      );
+      return cat ? { id: cat.id, name: cat.name } : { id: null, name };
+    },
+    [categories],
+  );
+
+  // Get the first expense category as a fallback
+  const firstExpenseCategory = useCallback((): {
+    id: string | null;
+    name: string;
+  } => {
+    const cat = categories[0];
+    return cat
+      ? { id: cat.id, name: cat.name }
+      : { id: null, name: 'Expense' };
+  }, [categories]);
+
   // Parse natural language input
   const parseInput = useCallback(
     (text: string) => {
       // Try to extract amount (number) and description
       const amountMatch = text.match(/(\d+(?:,\d{3})*(?:\.\d{1,2})?)/);
-      const amount = amountMatch ? parseFloat(amountMatch[1].replace(/,/g, '')) : 0;
-      const desc = text.replace(amountMatch?.[0] ?? '', '').trim() || (amountMatch ? '' : text);
+      const amount = amountMatch
+        ? parseFloat(amountMatch[1].replace(/,/g, ''))
+        : 0;
+      const desc =
+        text.replace(amountMatch?.[0] ?? '', '').trim() ||
+        (amountMatch ? '' : text);
 
       // Try to auto-categorize
       const lowerDesc = desc.toLowerCase();
-      let foundCategory = KEYWORD_MAP['food'];
+      let foundCategoryName: string | null = null;
 
       // Check each keyword in the description
-      for (const [keyword, cat] of Object.entries(KEYWORD_MAP)) {
+      for (const [keyword, catName] of Object.entries(KEYWORD_MAP)) {
         if (lowerDesc.includes(keyword)) {
-          foundCategory = cat;
+          foundCategoryName = catName;
           break;
         }
       }
@@ -180,17 +230,25 @@ export default function QuickEntry({ open, onClose, onSuccess }: QuickEntryProps
       const words = lowerDesc.split(/\s+/);
       for (const word of words) {
         if (KEYWORD_MAP[word]) {
-          foundCategory = KEYWORD_MAP[word];
+          foundCategoryName = KEYWORD_MAP[word];
           break;
         }
       }
 
+      // Resolve to real category ID from loaded categories
+      let resolvedCategory = foundCategoryName
+        ? findCategoryByName(foundCategoryName)
+        : null;
+      if (!resolvedCategory || !resolvedCategory.id) {
+        resolvedCategory = firstExpenseCategory();
+      }
+
       setParsedDescription(desc || (amount ? text : text));
       setParsedAmount(amount);
-      setParsedCategoryId(foundCategory.categoryId);
-      setParsedCategoryName(foundCategory.categoryName);
+      setParsedCategoryId(resolvedCategory.id);
+      setParsedCategoryName(resolvedCategory.name);
     },
-    [],
+    [findCategoryByName, firstExpenseCategory],
   );
 
   // Re-parse when input changes
@@ -215,8 +273,8 @@ export default function QuickEntry({ open, onClose, onSuccess }: QuickEntryProps
         type: 'expense',
         category_id: parsedCategoryId,
         account_id: null,
-        description: parsedDescription,
-        merchant: '',
+        description: parsedDescription || null,
+        merchant: null,
         date: getTodayDateString(),
         tags: [],
         is_recurring: false,
@@ -224,7 +282,13 @@ export default function QuickEntry({ open, onClose, onSuccess }: QuickEntryProps
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add transaction');
+      const msg = err instanceof Error ? err.message : 'Failed to add transaction';
+      // Provide a clearer message for foreign-key errors
+      if (msg.includes('foreign key') || msg.includes('violates foreign')) {
+        setError('Could not save: selected category may not exist. Please choose a category from the list.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -239,29 +303,16 @@ export default function QuickEntry({ open, onClose, onSuccess }: QuickEntryProps
     }
   };
 
-  // Category icon picker
-  const getCategoryIcon = (categoryId: string) => {
-    const iconMap: Record<string, React.ReactNode> = {
-      'cat-food': <UtensilsCrossed className="h-4 w-4" />,
-      'cat-groceries': <ShoppingBasket className="h-4 w-4" />,
-      'cat-fuel': <Fuel className="h-4 w-4" />,
-      'cat-shopping': <ShoppingBag className="h-4 w-4" />,
-      'cat-entertainment': <Clapperboard className="h-4 w-4" />,
-      'cat-medical': <HeartPulse className="h-4 w-4" />,
-      'cat-travel': <Plane className="h-4 w-4" />,
-      'cat-education': <GraduationCap className="h-4 w-4" />,
-      'cat-rent': <Building className="h-4 w-4" />,
-      'cat-electricity': <Zap className="h-4 w-4" />,
-      'cat-internet': <Wifi className="h-4 w-4" />,
-      'cat-emi': <CreditCard className="h-4 w-4" />,
-      'cat-bills': <Smartphone className="h-4 w-4" />,
-      'cat-insurance': <HeartPulse className="h-4 w-4" />,
-      'cat-subscription': <CreditCard className="h-4 w-4" />,
-      'cat-gift': <Gift className="h-4 w-4" />,
-      'cat-misc': <Ellipsis className="h-4 w-4" />,
-    };
-    return iconMap[categoryId] || <Ellipsis className="h-4 w-4" />;
-  };
+  // Category icon picker — resolves from the loaded categories state by real UUID
+  const getCategoryIcon = useCallback(
+    (categoryId: string | null) => {
+      if (!categoryId) return <Ellipsis className="h-4 w-4" />;
+      const cat = categories.find((c) => c.id === categoryId);
+      if (!cat) return <Ellipsis className="h-4 w-4" />;
+      return <QuickEntryIcon name={cat.icon} />;
+    },
+    [categories],
+  );
 
   const selectCategory = (cat: Category) => {
     setParsedCategoryId(cat.id);

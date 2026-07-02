@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { BarChart3 } from 'lucide-react';
-import type { Transaction } from '@/types/database';
 
 import ReportFilters, {
   type ReportFiltersState,
@@ -14,131 +13,11 @@ import TopExpensesTable from '@/components/reports/TopExpensesTable';
 
 export const Route = createFileRoute('/reports')({ component: ReportsPage });
 
-// ─── Demo Mock Data ───────────────────────────────────────────────────────────
-
-const MONTHLY_TREND = [
-  { month: 'Jan', income: 59000, expenses: 32000, savings: 27000 },
-  { month: 'Feb', income: 59000, expenses: 35800, savings: 23200 },
-  { month: 'Mar', income: 59000, expenses: 41000, savings: 18000 },
-  { month: 'Apr', income: 59000, expenses: 38900, savings: 20100 },
-  { month: 'May', income: 64500, expenses: 45200, savings: 19300 },
-  { month: 'Jun', income: 59000, expenses: 47800, savings: 11200 },
-];
-
-const CATEGORY_BREAKDOWN = [
-  { name: 'Rent', amount: 15000, color: '#4fb8b2', percentage: 28 },
-  { name: 'Food', amount: 8500, color: '#f59e0b', percentage: 16 },
-  { name: 'Shopping', amount: 7200, color: '#8b5cf6', percentage: 14 },
-  { name: 'Entertainment', amount: 5400, color: '#ec4899', percentage: 10 },
-  { name: 'Fuel', amount: 4800, color: '#6366f1', percentage: 9 },
-  { name: 'Travel', amount: 3600, color: '#06b6d4', percentage: 7 },
-  { name: 'Electricity', amount: 3200, color: '#14b8a6', percentage: 6 },
-  { name: 'Medical', amount: 2500, color: '#ef4444', percentage: 5 },
-  { name: 'Internet', amount: 1800, color: '#f97316', percentage: 3 },
-  { name: 'Education', amount: 1200, color: '#84cc16', percentage: 2 },
-];
-
-const SAVINGS_TREND = [
-  { month: 'Jan', savings: 27000, target: 5000 },
-  { month: 'Feb', savings: 23200, target: 5000 },
-  { month: 'Mar', savings: 18000, target: 5000 },
-  { month: 'Apr', savings: 20100, target: 5000 },
-  { month: 'May', savings: 19300, target: 5000 },
-  { month: 'Jun', savings: 11200, target: 5000 },
-];
-
-const BUDGET_UTILIZATION = [
-  { category: 'Shopping', budget: 6000, spent: 7200, percentage: 120 },
-  { category: 'Entertainment', budget: 6000, spent: 5400, percentage: 90 },
-  { category: 'Food', budget: 10000, spent: 8500, percentage: 85 },
-  { category: 'Electricity', budget: 4000, spent: 3200, percentage: 80 },
-  { category: 'Internet', budget: 2400, spent: 1800, percentage: 75 },
-  { category: 'Fuel', budget: 8000, spent: 4800, percentage: 60 },
-  { category: 'Medical', budget: 5000, spent: 2500, percentage: 50 },
-  { category: 'Travel', budget: 8000, spent: 3600, percentage: 45 },
-  { category: 'Education', budget: 3000, spent: 1200, percentage: 40 },
-  { category: 'Rent', budget: 15000, spent: 15000, percentage: 100 },
-];
-
-const CATEGORY_ID_MAP: Record<string, string> = {
-  Food: 'cat-food',
-  Groceries: 'cat-groceries',
-  Fuel: 'cat-fuel',
-  Rent: 'cat-rent',
-  Electricity: 'cat-electricity',
-  Internet: 'cat-internet',
-  Shopping: 'cat-shopping',
-  Entertainment: 'cat-entertainment',
-  Medical: 'cat-medical',
-  Travel: 'cat-travel',
-  Education: 'cat-education',
-  Subscription: 'cat-subscription',
-  Bills: 'cat-bills',
-  Insurance: 'cat-insurance',
-  Misc: 'cat-misc',
-};
-
-function generateTopExpenses(): Transaction[] {
-  const descriptions: { category: string; desc: string; amount: number }[] = [
-    { category: 'Rent', desc: 'Monthly apartment rent - March', amount: 15000 },
-    { category: 'Rent', desc: 'Monthly apartment rent - April', amount: 15000 },
-    { category: 'Rent', desc: 'Monthly apartment rent - May', amount: 15000 },
-    { category: 'Shopping', desc: 'Weekend mall shopping - clothing', amount: 5200 },
-    { category: 'Shopping', desc: 'Online electronics purchase', amount: 4800 },
-    { category: 'Shopping', desc: 'Home decor items', amount: 3200 },
-    { category: 'Shopping', desc: 'New running shoes', amount: 2800 },
-    { category: 'Entertainment', desc: 'Concert tickets - April', amount: 4200 },
-    { category: 'Entertainment', desc: 'Movie night with friends', amount: 3500 },
-    { category: 'Food', desc: 'Grocery run - Week 1', amount: 2800 },
-    { category: 'Food', desc: 'Grocery run - Week 2', amount: 2600 },
-    { category: 'Food', desc: 'Restaurant dinner - Italian', amount: 1800 },
-    { category: 'Food', desc: 'Weekend brunch', amount: 1200 },
-    { category: 'Food', desc: 'Grocery run - Week 3', amount: 2400 },
-    { category: 'Fuel', desc: 'Petrol refill - City driving', amount: 2400 },
-    { category: 'Fuel', desc: 'Petrol refill - Highway trip', amount: 3600 },
-    { category: 'Travel', desc: 'Weekend getaway - hotel booking', amount: 4500 },
-    { category: 'Travel', desc: 'Flight booking - domestic', amount: 3800 },
-    { category: 'Medical', desc: 'Doctor consultation & medicines', amount: 2500 },
-    { category: 'Electricity', desc: 'Monthly electricity bill', amount: 3200 },
-    { category: 'Internet', desc: 'Broadband monthly charge', amount: 1800 },
-    { category: 'Education', desc: 'Online course enrollment', amount: 1200 },
-    { category: 'Subscription', desc: 'Netflix annual plan', amount: 3500 },
-    { category: 'Subscription', desc: 'Spotify premium 3 months', amount: 900 },
-    { category: 'Insurance', desc: 'Health insurance premium', amount: 8500 },
-    { category: 'Bills', desc: 'Water bill - quarterly', amount: 1600 },
-    { category: 'Misc', desc: 'Miscellaneous expenses', amount: 700 },
-  ];
-
-  return descriptions.map((item, i) => {
-    const day = 10 + (i % 18);
-    const monthIndex = i < 9 ? 0 : i < 18 ? 1 : 2;
-    const date = new Date(2026, monthIndex, day);
-
-    return {
-      id: `exp-${String(i + 1).padStart(3, '0')}`,
-      user_id: 'demo-user',
-      account_id: 'acc-main',
-      category_id: CATEGORY_ID_MAP[item.category] ?? 'cat-other',
-      amount: item.amount,
-      description: item.desc,
-      merchant: null,
-      date: date.toISOString().split('T')[0],
-      type: 'expense' as const,
-      is_recurring: false,
-      tags: [],
-      created_at: date.toISOString(),
-      updated_at: date.toISOString(),
-    };
-  });
-}
-
-const TOP_EXPENSES = generateTopExpenses();
-
 // ─── Default Filter State ─────────────────────────────────────────────────────
 
 const DEFAULT_FILTERS: ReportFiltersState = {
   period: 'month',
-  month: '2026-06',
+  month: new Date().toISOString().slice(0, 7),
   category: '',
   type: 'all',
 };
@@ -170,22 +49,22 @@ function ReportsPage() {
         />
       </div>
 
-      {/* Charts Grid */}
+      {/* Charts Grid — data sourced from Supabase; empty until user has transactions */}
       <div className="space-y-6">
         {/* Row 1: Income vs Expenses + Savings Trend */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <IncomeVsExpenseChart data={MONTHLY_TREND} />
-          <SavingsTrendChart data={SAVINGS_TREND} />
+          <IncomeVsExpenseChart data={[]} />
+          <SavingsTrendChart data={[]} />
         </div>
 
         {/* Row 2: Category Breakdown + Budget Utilization */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <CategoryBreakdownReport data={CATEGORY_BREAKDOWN} />
-          <BudgetUtilizationReport data={BUDGET_UTILIZATION} />
+          <CategoryBreakdownReport data={[]} />
+          <BudgetUtilizationReport data={[]} />
         </div>
 
         {/* Row 3: Top Expenses Table (full width) */}
-        <TopExpensesTable data={TOP_EXPENSES} />
+        <TopExpensesTable data={[]} />
       </div>
     </main>
   );

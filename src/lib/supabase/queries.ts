@@ -6,30 +6,41 @@ import type {
   Category,
   Account,
   Transaction,
-  BudgetRule,
   RecurringExpense,
   Investment,
   Goal,
 } from '@/types/database';
 
-// ─── Helper ────────────────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
-function getUserId(): string | null {
+/**
+ * Get the current authenticated user ID from the Supabase session.
+ * Returns null if no session exists (callers should handle gracefully).
+ */
+async function getUserId(): Promise<string | null> {
   try {
-    const raw = localStorage.getItem('finos-auth');
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed?.state?.user?.id ?? null;
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user?.id ?? null;
   } catch {
     return null;
   }
 }
 
-// ─── Categories ────────────────────────────────────────────────────────────
+/**
+ * Wait for the Supabase auth session to be ready and return the user ID.
+ * Throws a clear error if no authenticated session exists.
+ */
+export async function ensureSession(): Promise<string> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) throw new Error('Not authenticated');
+  return session.user.id;
+}
+
+// ─── Categories ─────────────────────────────────────────────────────────────
 
 export const categoryQueries = {
   async list(): Promise<Category[]> {
-    const user_id = getUserId();
+    const user_id = await getUserId();
     if (!user_id) return [];
     const { data, error } = await supabase
       .from('categories')
@@ -41,8 +52,7 @@ export const categoryQueries = {
   },
 
   async create(category: Omit<Category, 'id' | 'created_at'>): Promise<Category> {
-    const user_id = getUserId();
-    if (!user_id) throw new Error('Not authenticated');
+    const user_id = await ensureSession();
     const { data, error } = await supabase
       .from('categories')
       .insert([{ ...category, user_id }])
@@ -69,11 +79,11 @@ export const categoryQueries = {
   },
 };
 
-// ─── Accounts ──────────────────────────────────────────────────────────────
+// ─── Accounts ───────────────────────────────────────────────────────────────
 
 export const accountQueries = {
   async list(): Promise<Account[]> {
-    const user_id = getUserId();
+    const user_id = await getUserId();
     if (!user_id) return [];
     const { data, error } = await supabase
       .from('accounts')
@@ -85,8 +95,7 @@ export const accountQueries = {
   },
 
   async create(account: Omit<Account, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Account> {
-    const user_id = getUserId();
-    if (!user_id) throw new Error('Not authenticated');
+    const user_id = await ensureSession();
     const { data, error } = await supabase
       .from('accounts')
       .insert([{ ...account, user_id }])
@@ -113,11 +122,11 @@ export const accountQueries = {
   },
 };
 
-// ─── Transactions ──────────────────────────────────────────────────────────
+// ─── Transactions ───────────────────────────────────────────────────────────
 
 export const transactionQueries = {
   async list(limit = 50): Promise<Transaction[]> {
-    const user_id = getUserId();
+    const user_id = await getUserId();
     if (!user_id) return [];
     const { data, error } = await supabase
       .from('transactions')
@@ -130,8 +139,7 @@ export const transactionQueries = {
   },
 
   async create(tx: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Transaction> {
-    const user_id = getUserId();
-    if (!user_id) throw new Error('Not authenticated');
+    const user_id = await ensureSession();
     const { data, error } = await supabase
       .from('transactions')
       .insert([{ ...tx, user_id }])
@@ -156,27 +164,13 @@ export const transactionQueries = {
       .eq('id', id);
     if (error) throw error;
   },
-
-  async getByDateRange(from: string, to: string): Promise<Transaction[]> {
-    const user_id = getUserId();
-    if (!user_id) return [];
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('*')
-      .eq('user_id', user_id)
-      .gte('date', from)
-      .lte('date', to)
-      .order('date', { ascending: false });
-    if (error) throw error;
-    return data ?? [];
-  },
 };
 
-// ─── Recurring Expenses ────────────────────────────────────────────────────
+// ─── Recurring Expenses ─────────────────────────────────────────────────────
 
 export const recurringQueries = {
   async list(): Promise<RecurringExpense[]> {
-    const user_id = getUserId();
+    const user_id = await getUserId();
     if (!user_id) return [];
     const { data, error } = await supabase
       .from('recurring_expenses')
@@ -188,8 +182,7 @@ export const recurringQueries = {
   },
 
   async create(expense: Omit<RecurringExpense, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<RecurringExpense> {
-    const user_id = getUserId();
-    if (!user_id) throw new Error('Not authenticated');
+    const user_id = await ensureSession();
     const { data, error } = await supabase
       .from('recurring_expenses')
       .insert([{ ...expense, user_id }])
@@ -216,11 +209,11 @@ export const recurringQueries = {
   },
 };
 
-// ─── Goals ─────────────────────────────────────────────────────────────────
+// ─── Goals ──────────────────────────────────────────────────────────────────
 
 export const goalQueries = {
   async list(): Promise<Goal[]> {
-    const user_id = getUserId();
+    const user_id = await getUserId();
     if (!user_id) return [];
     const { data, error } = await supabase
       .from('goals')
@@ -232,8 +225,7 @@ export const goalQueries = {
   },
 
   async create(goal: Omit<Goal, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Goal> {
-    const user_id = getUserId();
-    if (!user_id) throw new Error('Not authenticated');
+    const user_id = await ensureSession();
     const { data, error } = await supabase
       .from('goals')
       .insert([{ ...goal, user_id }])
@@ -260,11 +252,11 @@ export const goalQueries = {
   },
 };
 
-// ─── Investments ───────────────────────────────────────────────────────────
+// ─── Investments ────────────────────────────────────────────────────────────
 
 export const investmentQueries = {
   async list(): Promise<Investment[]> {
-    const user_id = getUserId();
+    const user_id = await getUserId();
     if (!user_id) return [];
     const { data, error } = await supabase
       .from('investments')
@@ -275,104 +267,11 @@ export const investmentQueries = {
     return data ?? [];
   },
 
-  async create(investment: Omit<Investment, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<Investment> {
-    const user_id = getUserId();
-    if (!user_id) throw new Error('Not authenticated');
-    const { data, error } = await supabase
-      .from('investments')
-      .insert([{ ...investment, user_id }])
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  },
-
-  async update(id: string, updates: Partial<Investment>): Promise<void> {
-    const { error } = await supabase
-      .from('investments')
-      .update(updates)
-      .eq('id', id);
-    if (error) throw error;
-  },
-
   async delete(id: string): Promise<void> {
     const { error } = await supabase
       .from('investments')
       .delete()
       .eq('id', id);
     if (error) throw error;
-  },
-};
-
-// ─── Budget Rules ──────────────────────────────────────────────────────────
-
-export const budgetRuleQueries = {
-  async list(): Promise<BudgetRule[]> {
-    const user_id = getUserId();
-    if (!user_id) return [];
-    const { data, error } = await supabase
-      .from('budget_rules')
-      .select('*')
-      .eq('user_id', user_id)
-      .order('name');
-    if (error) throw error;
-    return data ?? [];
-  },
-
-  async create(rule: Omit<BudgetRule, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<BudgetRule> {
-    const user_id = getUserId();
-    if (!user_id) throw new Error('Not authenticated');
-    const { data, error } = await supabase
-      .from('budget_rules')
-      .insert([{ ...rule, user_id }])
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  },
-
-  async update(id: string, updates: Partial<BudgetRule>): Promise<void> {
-    const { error } = await supabase
-      .from('budget_rules')
-      .update(updates)
-      .eq('id', id);
-    if (error) throw error;
-  },
-
-  async delete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('budget_rules')
-      .delete()
-      .eq('id', id);
-    if (error) throw error;
-  },
-
-  async getActive(): Promise<BudgetRule[]> {
-    const user_id = getUserId();
-    if (!user_id) return [];
-    const { data, error } = await supabase
-      .from('budget_rules')
-      .select('*')
-      .eq('user_id', user_id)
-      .eq('is_active', true);
-    if (error) throw error;
-    return data ?? [];
-  },
-};
-
-// ─── Monthly Snapshots ─────────────────────────────────────────────────────
-
-export const snapshotQueries = {
-  async getByMonth(month: string): Promise<{ total_income: number; total_expenses: number; savings: number } | null> {
-    const user_id = getUserId();
-    if (!user_id) return null;
-    const { data, error } = await supabase
-      .from('monthly_snapshots')
-      .select('total_income, total_expenses, savings')
-      .eq('user_id', user_id)
-      .eq('month', month)
-      .single();
-    if (error && error.code !== 'PGRST116') throw error;
-    return data;
   },
 };

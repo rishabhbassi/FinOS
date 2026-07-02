@@ -14,7 +14,7 @@ export const Route = createFileRoute('/investments')({
 
 function InvestmentsPage() {
   const [investments, setInvestments] = useState<Investment[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
