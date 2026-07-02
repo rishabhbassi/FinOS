@@ -1,5 +1,5 @@
 // Finance OS - Fixed Expenses Section
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Trash2, AlertCircle, RefreshCw, Check, X, Wallet } from 'lucide-react';
 import type { PlannerExpenseEntry } from '@/types/app';
@@ -25,6 +25,12 @@ export function FixedExpensesSection({ entries, onUpdate }: FixedExpensesSection
   const [newName, setNewName] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [newRecurring, setNewRecurring] = useState(true);
+
+  // Sync local state when parent entries change (e.g. when planner loads
+  // recurring expenses via its own effect)
+  useEffect(() => {
+    setLocalEntries(entries);
+  }, [entries]);
 
   const totalFixed = useMemo(
     () => localEntries.reduce((sum, e) => sum + e.planned, 0),

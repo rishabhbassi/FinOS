@@ -15,49 +15,32 @@ import type {
   PlannerVariableEntry,
   PlannerSummary,
 } from '@/types/app';
+import type { RecurringExpense } from '@/types/database';
+
+// ---------------------------------------------------------------------------
+// Default recurring expenses (same RecurringExpense type used by
+// RecurringManager in the Settings page)
+// ---------------------------------------------------------------------------
+const DEFAULT_RECURRING_EXPENSES: RecurringExpense[] = [
+  { id: 'rec-1', user_id: '', category_id: 'Rent', account_id: null, name: 'Rent', amount: 21000, frequency: 'monthly', day_of_month: 1, day_of_week: null, is_active: true, created_at: '', updated_at: '' },
+  { id: 'rec-2', user_id: '', category_id: 'Electricity', account_id: null, name: 'Electricity', amount: 1200, frequency: 'monthly', day_of_month: 5, day_of_week: null, is_active: true, created_at: '', updated_at: '' },
+  { id: 'rec-3', user_id: '', category_id: 'Internet', account_id: null, name: 'Internet', amount: 1000, frequency: 'monthly', day_of_month: 10, day_of_week: null, is_active: true, created_at: '', updated_at: '' },
+  { id: 'rec-4', user_id: '', category_id: 'SIP', account_id: null, name: 'SIP', amount: 7000, frequency: 'monthly', day_of_month: 15, day_of_week: null, is_active: true, created_at: '', updated_at: '' },
+];
 
 export const Route = createFileRoute('/planner')({
   component: PlannerPage,
 });
-
-// ── Default mock data ──────────────────────────────────────────────────
-
-function getDefaultIncome(): PlannerIncomeEntry[] {
-  return [
-    { categoryId: 'inc-salary', categoryName: 'Salary', planned: 59000, actual: 59000 },
-    { categoryId: 'inc-bonus', categoryName: 'Bonus', planned: 0, actual: 0 },
-    { categoryId: 'inc-freelance', categoryName: 'Freelancing', planned: 5000, actual: 3000 },
-    { categoryId: 'inc-interest', categoryName: 'Interest', planned: 500, actual: 500 },
-  ];
-}
-
-function getDefaultFixedExpenses(): PlannerExpenseEntry[] {
-  return [
-    { categoryId: 'exp-rent', categoryName: 'Rent', planned: 21000, actual: 21000, isRecurring: true },
-    { categoryId: 'exp-electricity', categoryName: 'Electricity', planned: 1200, actual: 1200, isRecurring: true },
-    { categoryId: 'exp-internet', categoryName: 'Internet', planned: 1000, actual: 1000, isRecurring: true },
-    { categoryId: 'exp-sip', categoryName: 'SIP', planned: 7000, actual: 7000, isRecurring: true },
-  ];
-}
-
-function getDefaultVariableCategories(): PlannerVariableEntry[] {
-  return [
-    { categoryId: 'var-food', categoryName: 'Food', dailyLimit: 300, monthlyBudget: 9000, spent: 4200, remaining: 4800 },
-    { categoryId: 'var-fuel', categoryName: 'Fuel', dailyLimit: 200, monthlyBudget: 6000, spent: 2800, remaining: 3200 },
-    { categoryId: 'var-shopping', categoryName: 'Shopping', dailyLimit: 200, monthlyBudget: 6000, spent: 1500, remaining: 4500 },
-    { categoryId: 'var-entertainment', categoryName: 'Entertainment', dailyLimit: 150, monthlyBudget: 4500, spent: 1200, remaining: 3300 },
-  ];
-}
 
 // ── Page Component ─────────────────────────────────────────────────────
 
 function PlannerPage() {
   const { loading: budgetLoading, error: budgetError, refresh: refetchBudget } = useBudget();
 
-  // State for all planner entries
-  const [incomeEntries, setIncomeEntries] = useState<PlannerIncomeEntry[]>(getDefaultIncome);
-  const [fixedExpenses, setFixedExpenses] = useState<PlannerExpenseEntry[]>(getDefaultFixedExpenses);
-  const [variableCategories, setVariableCategories] = useState<PlannerVariableEntry[]>(getDefaultVariableCategories);
+  // State for all planner entries — start empty
+  const [incomeEntries, setIncomeEntries] = useState<PlannerIncomeEntry[]>([]);
+  const [fixedExpenses, setFixedExpenses] = useState<PlannerExpenseEntry[]>([]);
+  const [variableCategories, setVariableCategories] = useState<PlannerVariableEntry[]>([]);
   const [isQuarterEnd, setIsQuarterEnd] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
 
@@ -67,19 +50,31 @@ function PlannerPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Load recurring subscriptions into fixed expenses on mount
+  useEffect(() => {
+    const defaults: PlannerExpenseEntry[] = DEFAULT_RECURRING_EXPENSES
+      .filter((r) => r.is_active)
+      .map((r, i) => ({
+        categoryId: `rec-${i}`,
+        categoryName: r.name,
+        planned: r.amount,
+        actual: r.amount,
+        isRecurring: true,
+      }));
+    setFixedExpenses(defaults);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Compute the summary from current entries
   const summary: PlannerSummary = useMemo(() => {
+    // Quarter-end toggle: apply a 20% bonus to salary entries
     const adjustedIncome = isQuarterEnd
       ? incomeEntries.map((e) =>
           e.categoryName === 'Salary'
-            ? { ...e, planned: 59000 }
+            ? { ...e, planned: Math.round(e.planned * 1.2) }
             : e
         )
-      : incomeEntries.map((e) =>
-          e.categoryName === 'Salary'
-            ? { ...e, planned: 49000 }
-            : e
-        );
+      : incomeEntries;
 
     const totalIncome = adjustedIncome.reduce((sum, e) => sum + e.planned, 0);
     const totalFixed = fixedExpenses.reduce((sum, e) => sum + e.planned, 0);

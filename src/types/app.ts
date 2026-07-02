@@ -67,6 +67,8 @@ export interface PlannerExpenseEntry {
   isRecurring: boolean;
 }
 
+export type BudgetFrequency = 'daily' | 'weekly' | 'monthly';
+
 export interface PlannerVariableEntry {
   categoryId: string;
   categoryName: string;
@@ -74,6 +76,7 @@ export interface PlannerVariableEntry {
   monthlyBudget: number;
   spent: number;
   remaining: number;
+  frequency?: BudgetFrequency;
 }
 
 export interface PlannerSummary {

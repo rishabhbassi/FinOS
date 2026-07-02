@@ -143,6 +143,21 @@ export function CategoryBudgetBar({
         </h3>
       </div>
 
+      {/* Column headers */}
+      <div className="mb-3 flex items-center justify-between px-1">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+          Category
+        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+            Spent / Budget
+          </span>
+          <span className="min-w-[40px] text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+            Used
+          </span>
+        </div>
+      </div>
+
       {/* Category Rows */}
       <div className="space-y-4">
         {sortedData.map((item, index) => {

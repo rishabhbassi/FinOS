@@ -160,6 +160,25 @@ export function MonthView({ month, loading, error, onRetry }: MonthViewProps) {
         </div>
       </div>
 
+      {/* Column headers */}
+      <div className="mb-3 flex items-center gap-3 px-3">
+        <span className="min-w-[52px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+          Week
+        </span>
+        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+          Budget
+        </span>
+        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+          Spent
+        </span>
+        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+          Surplus
+        </span>
+        <span className="min-w-[80px] text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
+          Carry Fwd
+        </span>
+      </div>
+
       {/* Week rows */}
       <div className="space-y-2">
         {month.weeks.map((week, index) => {

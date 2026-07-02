@@ -126,22 +126,25 @@ export function useDashboard(): {
         }
       }
 
-      // Monthly comparison: this month vs mock last month data
-      const lastMonthTotalExpenses = fixedExpenses + 19500; // slightly higher spending last month
-      const lastMonthSavings = totalIncome - lastMonthTotalExpenses;
+      // If no income at all, return null to show empty state
+      if (totalIncome <= 0 || allTransactions.length === 0) {
+        setDashboardData(null);
+        return;
+      }
 
+      // Monthly comparison
       const monthlyComparison = {
         thisMonth: {
           savings: monthOverview.savings,
           expenses: monthOverview.expenses,
         },
         lastMonth: {
-          savings: lastMonthSavings,
-          expenses: lastMonthTotalExpenses,
+          savings: 0,
+          expenses: 0,
         },
         change: {
-          savings: monthOverview.savings - lastMonthSavings,
-          expenses: monthOverview.expenses - lastMonthTotalExpenses,
+          savings: monthOverview.savings,
+          expenses: monthOverview.expenses,
         },
       };
 

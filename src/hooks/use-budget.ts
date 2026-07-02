@@ -57,6 +57,15 @@ export function useBudget(): {
         now,
       );
 
+      // If no income, return null to show empty state
+      if (totalIncome <= 0 || transactions.length === 0) {
+        setDailyDecision(null);
+        setWeekData(null);
+        setMonthData(null);
+        setTimeline([]);
+        return;
+      }
+
       // Find current week from the month data
       const todayStr = toDateString(now);
       const currentWeek = month.weeks.find(

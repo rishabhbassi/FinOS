@@ -9,25 +9,25 @@
 }
 
 :root {
-  --sea-ink: #1e1e2e;
-  --sea-ink-soft: #585b70;
-  --lagoon: #2dd4bf;
-  --lagoon-deep: #14b8a6;
-  --palm: #059669;
+  --sea-ink: #1a1a2e;
+  --sea-ink-soft: #4a4a6a;
+  --lagoon: #0d9488;
+  --lagoon-deep: #0f766e;
+  --palm: #047857;
   --sand: #f5f5f9;
   --foam: #eeeef4;
   --surface: rgba(255, 255, 255, 0.78);
   --surface-strong: rgba(255, 255, 255, 0.94);
-  --line: rgba(30, 30, 46, 0.1);
+  --line: rgba(26, 26, 46, 0.1);
   --inset-glint: rgba(255, 255, 255, 0.85);
-  --kicker: rgba(5, 150, 105, 0.85);
+  --kicker: rgba(4, 120, 87, 0.85);
   --bg-base: #f0f0f5;
   --header-bg: rgba(248, 248, 252, 0.85);
   --chip-bg: rgba(255, 255, 255, 0.82);
-  --chip-line: rgba(30, 30, 46, 0.1);
-  --positive: #059669;
-  --negative: #e11d48;
-  --warning: #d97706;
+  --chip-line: rgba(26, 26, 46, 0.1);
+  --positive: #047857;
+  --negative: #be123c;
+  --warning: #b45309;
 }
 
 :root[data-theme="dark"] {
@@ -104,7 +104,7 @@ a {
 }
 
 a:hover {
-  color: #0d9488;
+  color: #0f766e;
 }
 
 code {
