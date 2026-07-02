@@ -209,8 +209,8 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
         </div>
       </div>
 
-      {/* Column headers */}
-      <div className="mb-2 flex items-center gap-3 px-3">
+      {/* Column headers — hidden on mobile */}
+      <div className="mb-2 hidden items-center gap-3 px-3 sm:flex">
         <span className="min-w-[44px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
           Day
         </span>
@@ -248,7 +248,7 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
             <div key={day.date}>
               <motion.div
                 className={cn(
-                  'flex items-center gap-3 rounded-xl border p-3 transition-all',
+                  'rounded-xl border p-3 transition-all',
                   isToday
                     ? 'border-[var(--lagoon)]/40 bg-[var(--lagoon)]/5 shadow-[0_0_12px_var(--lagoon)/0.08]'
                     : 'border-[var(--line)]',
@@ -261,77 +261,86 @@ export function WeekView({ week, loading, error, onRetry }: WeekViewProps) {
                   ease: [0.16, 1, 0.3, 1],
                 }}
               >
-                {/* Day name */}
-                <span
-                  className={cn(
-                    'min-w-[44px] text-xs font-semibold',
-                    isToday
-                      ? 'text-[var(--lagoon-deep)]'
-                      : 'text-[var(--sea-ink)]',
-                  )}
-                >
-                  {day.dayName}
-                </span>
+                {/* Mobile: card layout */}
+                <div className="flex flex-col gap-1 sm:hidden">
+                  <div className="flex items-center justify-between">
+                    <span className={cn('text-sm font-bold', isToday ? 'text-[var(--lagoon-deep)]' : 'text-[var(--sea-ink)]')}>
+                      {day.dayName}
+                    </span>
+                    {isToday && (
+                      <span className="demo-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-[var(--lagoon-deep)]">
+                        Today
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                    <span className="text-[var(--sea-ink-soft)]">Budget</span>
+                    <span className="tabular-nums text-right font-medium text-[var(--sea-ink)]">
+                      {editMode ? (
+                        <input
+                          type="number"
+                          value={budgetInputs[day.date] ?? String(effectiveBudget)}
+                          onChange={(e) =>
+                            setBudgetInputs((prev) => ({ ...prev, [day.date]: e.target.value }))
+                          }
+                          className="w-20 rounded border border-[var(--line)] bg-[var(--surface)] px-1.5 py-0.5 text-xs tabular-nums outline-none focus:border-[var(--lagoon)]"
+                          min="0"
+                        />
+                      ) : (
+                        formatCurrency(effectiveBudget)
+                      )}
+                    </span>
+                    <span className="text-[var(--sea-ink-soft)]">Spent</span>
+                    <span className="tabular-nums text-right font-medium">{formatCurrency(day.spent)}</span>
+                    <span className="text-[var(--sea-ink-soft)]">Remaining</span>
+                    <span className={cn('tabular-nums text-right font-semibold', day.remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                      {formatCurrency(day.remaining)}
+                    </span>
+                    <span className="text-[var(--sea-ink-soft)]">Carry Fwd</span>
+                    <span className={cn('tabular-nums text-right font-semibold', isSurplus ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                      {isSurplus ? '+' : ''}{formatCurrency(carryDisplay)}
+                    </span>
+                  </div>
+                </div>
 
-                {/* Budget (editable in plan mode) */}
-                {editMode ? (
-                  <input
-                    type="number"
-                    value={
-                      budgetInputs[day.date] ?? String(effectiveBudget)
-                    }
-                    onChange={(e) =>
-                      setBudgetInputs((prev) => ({
-                        ...prev,
-                        [day.date]: e.target.value,
-                      }))
-                    }
-                    className="min-w-[72px] rounded border border-[var(--line)] bg-[var(--surface)] px-1.5 py-1 text-xs tabular-nums text-[var(--sea-ink)] outline-none focus:border-[var(--lagoon)] focus:ring-1 focus:ring-[var(--lagoon)]/30"
-                    min="0"
-                    step="1"
-                  />
-                ) : (
-                  <span className="min-w-[72px] text-xs tabular-nums text-[var(--sea-ink-soft)]">
-                    {formatCurrency(effectiveBudget)}
+                {/* Desktop: row layout */}
+                <div className="hidden items-center gap-3 sm:flex">
+                  {/* Day name */}
+                  <span className={cn('min-w-[44px] text-xs font-semibold', isToday ? 'text-[var(--lagoon-deep)]' : 'text-[var(--sea-ink)]')}>
+                    {day.dayName}
                   </span>
-                )}
 
-                {/* Spent */}
-                <span className="min-w-[72px] text-xs font-medium tabular-nums text-[var(--sea-ink)]">
-                  {formatCurrency(day.spent)}
-                </span>
-
-                {/* Remaining */}
-                <span
-                  className={cn(
-                    'min-w-[80px] text-right text-xs font-semibold tabular-nums',
-                    day.remaining >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-500 dark:text-red-400',
+                  {/* Budget */}
+                  {editMode ? (
+                    <input
+                      type="number"
+                      value={budgetInputs[day.date] ?? String(effectiveBudget)}
+                      onChange={(e) => setBudgetInputs((prev) => ({ ...prev, [day.date]: e.target.value }))}
+                      className="min-w-[72px] rounded border border-[var(--line)] bg-[var(--surface)] px-1.5 py-1 text-xs tabular-nums outline-none focus:border-[var(--lagoon)] focus:ring-1 focus:ring-[var(--lagoon)]/30"
+                      min="0" step="1"
+                    />
+                  ) : (
+                    <span className="min-w-[72px] text-xs tabular-nums text-[var(--sea-ink-soft)]">{formatCurrency(effectiveBudget)}</span>
                   )}
-                >
-                  {formatCurrency(day.remaining)}
-                </span>
 
-                {/* Carry Forward */}
-                <span
-                  className={cn(
-                    'min-w-[88px] text-xs font-semibold tabular-nums',
-                    isSurplus
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-500 dark:text-red-400',
-                  )}
-                >
-                  {isSurplus ? '+' : ''}
-                  {formatCurrency(carryDisplay)}
-                </span>
+                  {/* Spent */}
+                  <span className="min-w-[72px] text-xs font-medium tabular-nums text-[var(--sea-ink)]">{formatCurrency(day.spent)}</span>
 
-                {/* Today indicator */}
-                {isToday && (
-                  <span className="demo-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-[var(--lagoon-deep)]">
-                    Today
+                  {/* Remaining */}
+                  <span className={cn('min-w-[80px] text-right text-xs font-semibold tabular-nums', day.remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                    {formatCurrency(day.remaining)}
                   </span>
-                )}
+
+                  {/* Carry Forward */}
+                  <span className={cn('min-w-[88px] text-xs font-semibold tabular-nums', isSurplus ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                    {isSurplus ? '+' : ''}{formatCurrency(carryDisplay)}
+                  </span>
+
+                  {/* Today indicator */}
+                  {isToday && (
+                    <span className="demo-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-[var(--lagoon-deep)]">Today</span>
+                  )}
+                </div>
               </motion.div>
 
               {/* Arrow between days */}

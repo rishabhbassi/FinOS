@@ -160,23 +160,13 @@ export function MonthView({ month, loading, error, onRetry }: MonthViewProps) {
         </div>
       </div>
 
-      {/* Column headers */}
-      <div className="mb-3 flex items-center gap-3 px-3">
-        <span className="min-w-[52px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
-          Week
-        </span>
-        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
-          Budget
-        </span>
-        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
-          Spent
-        </span>
-        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
-          Surplus
-        </span>
-        <span className="min-w-[80px] text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">
-          Carry Fwd
-        </span>
+      {/* Column headers — hidden on mobile */}
+      <div className="mb-3 hidden items-center gap-3 px-3 sm:flex">
+        <span className="min-w-[52px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">Week</span>
+        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">Budget</span>
+        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">Spent</span>
+        <span className="min-w-[72px] text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">Surplus</span>
+        <span className="min-w-[80px] text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--sea-ink-soft)]">Carry Fwd</span>
       </div>
 
       {/* Week rows */}
@@ -188,56 +178,45 @@ export function MonthView({ month, loading, error, onRetry }: MonthViewProps) {
               : 0;
 
           const progressVariant =
-            weekSpentPct > 90
-              ? 'danger'
-              : weekSpentPct > 70
-                ? 'warning'
+            weekSpentPct > 90 ? 'danger'
+              : weekSpentPct > 70 ? 'warning'
                 : 'success';
 
           return (
             <div key={week.weekNumber}>
               <motion.div
-                className="flex items-center gap-3 rounded-xl border border-[var(--line)] p-3"
+                className="rounded-xl border border-[var(--line)] p-3"
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{
-                  delay: index * 0.05,
-                  duration: 0.3,
-                  ease: [0.16, 1, 0.3, 1],
-                }}
+                transition={{ delay: index * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               >
-                {/* Week label */}
-                <span className="min-w-[52px] text-xs font-semibold text-[var(--sea-ink)]">
-                  Week {week.weekNumber}
-                </span>
+                {/* Mobile: card layout */}
+                <div className="flex flex-col gap-1 sm:hidden">
+                  <div className="text-sm font-bold text-[var(--sea-ink)]">Week {week.weekNumber}</div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                    <span className="text-[var(--sea-ink-soft)]">Budget</span>
+                    <span className="tabular-nums text-right font-medium">{formatCurrency(week.totalBudget)}</span>
+                    <span className="text-[var(--sea-ink-soft)]">Spent</span>
+                    <span className="tabular-nums text-right font-medium">{formatCurrency(week.totalSpent)}</span>
+                    <span className="text-[var(--sea-ink-soft)]">Surplus</span>
+                    <span className={cn('tabular-nums text-right font-semibold', week.surplus >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                      {week.surplus >= 0 ? '+' : ''}{formatCurrency(week.surplus)}
+                    </span>
+                    <span className="text-[var(--sea-ink-soft)]">Carry Fwd</span>
+                    <span className="tabular-nums text-right font-semibold text-[var(--lagoon-deep)]">{formatCurrency(week.carryForward)}</span>
+                  </div>
+                </div>
 
-                {/* Budget */}
-                <span className="min-w-[72px] text-xs tabular-nums text-[var(--sea-ink-soft)]">
-                  {formatCurrency(week.totalBudget)}
-                </span>
-
-                {/* Spent */}
-                <span className="min-w-[72px] text-xs font-medium tabular-nums text-[var(--sea-ink)]">
-                  {formatCurrency(week.totalSpent)}
-                </span>
-
-                {/* Surplus */}
-                <span
-                  className={cn(
-                    'min-w-[72px] text-xs font-semibold tabular-nums',
-                    week.surplus >= 0
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-500 dark:text-red-400'
-                  )}
-                >
-                  {week.surplus >= 0 ? '+' : ''}
-                  {formatCurrency(week.surplus)}
-                </span>
-
-                {/* Carry to next week */}
-                <span className="min-w-[80px] text-right text-xs font-semibold tabular-nums text-[var(--lagoon-deep)]">
-                  {formatCurrency(week.carryForward)}
-                </span>
+                {/* Desktop: row layout */}
+                <div className="hidden items-center gap-3 sm:flex">
+                  <span className="min-w-[52px] text-xs font-semibold text-[var(--sea-ink)]">Week {week.weekNumber}</span>
+                  <span className="min-w-[72px] text-xs tabular-nums text-[var(--sea-ink-soft)]">{formatCurrency(week.totalBudget)}</span>
+                  <span className="min-w-[72px] text-xs font-medium tabular-nums text-[var(--sea-ink)]">{formatCurrency(week.totalSpent)}</span>
+                  <span className={cn('min-w-[72px] text-xs font-semibold tabular-nums', week.surplus >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400')}>
+                    {week.surplus >= 0 ? '+' : ''}{formatCurrency(week.surplus)}
+                  </span>
+                  <span className="min-w-[80px] text-right text-xs font-semibold tabular-nums text-[var(--lagoon-deep)]">{formatCurrency(week.carryForward)}</span>
+                </div>
               </motion.div>
 
               {/* Progress bar for this week */}

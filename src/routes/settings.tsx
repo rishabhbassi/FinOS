@@ -13,7 +13,9 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Account, Category, RecurringExpense } from '@/types/database';
+import { supabase } from '@/lib/supabase/client';
 import { categoryQueries, accountQueries } from '@/lib/supabase/queries';
+import { useAuthStore } from '@/stores/auth-store';
 
 import ProfileForm from '@/components/settings/ProfileForm';
 import CategoryManager from '@/components/settings/CategoryManager';
@@ -161,11 +163,37 @@ function SettingsPage() {
   const deleteRecurring = useRecurringStore((s) => s.deleteExpense);
   const syncRecurring = useRecurringStore((s) => s.syncWithSupabase);
 
-  const [profile, setProfile] = useState({
-    name: 'Rishabh',
-    currency: 'INR' as string,
-    avatar_url: null as string | null,
-  });
+  const authUserId = useAuthStore((s) => s.user?.id);
+
+  const [profile, setProfile] = useState<{
+    name: string;
+    currency: string;
+    avatar_url: string | null;
+  }>({ name: '', currency: 'INR', avatar_url: null });
+
+  // Load profile from Supabase on mount
+  useEffect(() => {
+    if (authUserId) {
+      (async () => {
+        try {
+          const { data } = await supabase
+            .from('profiles')
+            .select('full_name, currency')
+            .eq('id', authUserId)
+            .single();
+          if (data) {
+            setProfile({
+              name: data.full_name ?? '',
+              currency: data.currency ?? 'INR',
+              avatar_url: null,
+            });
+          }
+        } catch {
+          // profile load failed — use defaults
+        }
+      })();
+    }
+  }, [authUserId]);
 
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('auto');
 
@@ -212,10 +240,20 @@ function SettingsPage() {
 
   // ---- Profile handlers ----
   const handleProfileSave = useCallback(
-    (updated: { name: string; currency: string; avatar_url?: string | null }) => {
+    async (updated: { name: string; currency: string; avatar_url?: string | null }) => {
       setProfile({ name: updated.name, currency: updated.currency, avatar_url: updated.avatar_url ?? null });
+      if (authUserId) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ full_name: updated.name, currency: updated.currency })
+            .eq('id', authUserId);
+        } catch {
+          // profile save non-critical
+        }
+      }
     },
-    [],
+    [authUserId],
   );
 
   // ---- Category handlers ----
