@@ -1,4 +1,4 @@
-// Finance OS - Month View Component
+// FinOS - Month View Component
 // Week-by-week monthly budget overview
 
 import { motion } from 'motion/react';

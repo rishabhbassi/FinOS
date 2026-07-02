@@ -1,4 +1,4 @@
-// Finance OS - Category Budget Bar Component
+// FinOS - Category Budget Bar Component
 // Per-category budget utilization with horizontal progress bars
 
 import { useMemo } from 'react';

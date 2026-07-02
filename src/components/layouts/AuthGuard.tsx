@@ -1,4 +1,4 @@
-// Finance OS - Auth Guard Component
+// FinOS - Auth Guard Component
 
 import { useEffect } from 'react';
 import { Link, useLocation } from '@tanstack/react-router';
@@ -49,7 +49,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--lagoon-deep)] text-xl font-bold text-white">
               F
             </div>
-            <h2 className="demo-title mb-1">Finance OS</h2>
+            <h2 className="demo-title mb-1">FinOS</h2>
             <p className="demo-muted mb-6">Sign in to manage your finances</p>
             <Link
               to="/auth/login"

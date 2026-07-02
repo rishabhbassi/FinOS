@@ -1,4 +1,4 @@
-// Finance OS - Budget Page Route
+// FinOS - Budget Page Route
 // Full budget page with weekly/monthly views and category utilization
 
 import { useState, useMemo } from 'react';

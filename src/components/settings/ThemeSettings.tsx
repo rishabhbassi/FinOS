@@ -47,7 +47,7 @@ export default function ThemeSettings({ theme, onChange }: ThemeSettingsProps) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-[var(--sea-ink-soft)]">
-        Choose how Finance OS looks. Your selection is saved locally and syncs across sessions.
+        Choose how FinOS looks. Your selection is saved locally and syncs across sessions.
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

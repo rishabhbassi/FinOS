@@ -1,4 +1,4 @@
-// Finance OS - Planner Page Route
+// FinOS - Planner Page Route
 import { useState, useMemo, useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { motion } from 'motion/react';

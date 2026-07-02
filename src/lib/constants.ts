@@ -1,4 +1,4 @@
-// Finance OS - Constants
+// FinOS - Constants
 
 export const INCOME_CATEGORIES = [
   'Salary', 'Bonus', 'Freelancing', 'Refund', 'Interest', 'Dividend', 'Other Income'

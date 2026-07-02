@@ -1,4 +1,4 @@
-// Finance OS - Product Tour
+// FinOS - Product Tour
 // A guided tour that highlights actual UI elements on the page
 
 import { useState, useCallback, useEffect, useRef } from 'react';
@@ -31,7 +31,7 @@ interface TourStepDef {
 
 const STEPS: TourStepDef[] = [
   {
-    title: 'Welcome to Finance OS',
+    title: 'Welcome to FinOS',
     description:
       'Your personal budget operating system. Let\'s take a quick tour of the key features so you can hit the ground running.',
     icon: Sparkles,
@@ -42,7 +42,7 @@ const STEPS: TourStepDef[] = [
   {
     title: 'Sidebar — Your Command Center',
     description:
-      'Use the sidebar to navigate between pages. Each icon takes you to a different part of Finance OS — Dashboard, Planner, Transactions, Budget, and more.',
+      'Use the sidebar to navigate between pages. Each icon takes you to a different part of FinOS — Dashboard, Planner, Transactions, Budget, and more.',
     icon: Menu,
     selector: '[class*="sidebar"], aside, nav.fin-sidebar, .fin-sidebar',
     placement: 'right',

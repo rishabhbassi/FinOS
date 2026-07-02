@@ -23,13 +23,21 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Finance OS',
+        title: 'FinOS',
       },
     ],
     links: [
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'icon',
+        href: '/favicon.svg',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/logo.svg',
       },
     ],
   }),

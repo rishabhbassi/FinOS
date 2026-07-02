@@ -1,4 +1,4 @@
-// Finance OS - Category Actions
+// FinOS - Category Actions
 // Real Supabase queries
 
 import { categoryQueries } from '@/lib/supabase/queries';

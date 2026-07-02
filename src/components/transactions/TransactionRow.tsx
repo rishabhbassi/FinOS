@@ -1,4 +1,4 @@
-// Finance OS - Transaction Row Component
+// FinOS - Transaction Row Component
 
 import { useState } from 'react';
 import {

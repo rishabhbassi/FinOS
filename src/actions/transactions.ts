@@ -1,4 +1,4 @@
-// Finance OS - Transaction Actions
+// FinOS - Transaction Actions
 // Real Supabase queries
 
 import { transactionQueries } from '@/lib/supabase/queries';

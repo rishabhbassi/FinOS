@@ -32,7 +32,7 @@ function ReportsPage() {
       {/* Page Header */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="island-kicker mb-1">Finance OS</p>
+          <p className="island-kicker mb-1">FinOS</p>
           <h1 className="flex items-center gap-2.5 text-2xl font-bold text-[var(--sea-ink)] sm:text-3xl">
             <BarChart3 className="h-7 w-7 text-[var(--lagoon)]" />
             Reports

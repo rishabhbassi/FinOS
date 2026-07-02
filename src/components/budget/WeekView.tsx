@@ -1,4 +1,4 @@
-// Finance OS - Week View Component
+// FinOS - Week View Component
 // Day-by-day budget tracking for the current week
 
 import { useState } from 'react';

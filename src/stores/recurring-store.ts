@@ -1,4 +1,4 @@
-// Finance OS - Recurring Expenses Store
+// FinOS - Recurring Expenses Store
 // Shared store so Planner stays in sync with Settings' RecurringManager
 
 import { create } from 'zustand';

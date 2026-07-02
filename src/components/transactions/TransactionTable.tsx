@@ -1,4 +1,4 @@
-// Finance OS - Transaction Table (TanStack Table v8)
+// FinOS - Transaction Table (TanStack Table v8)
 
 import { useState, useMemo } from 'react';
 import {

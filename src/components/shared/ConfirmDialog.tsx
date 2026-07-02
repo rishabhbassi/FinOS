@@ -1,4 +1,4 @@
-// Finance OS - Confirm Dialog Component
+// FinOS - Confirm Dialog Component
 
 import { useEffect, useCallback } from 'react';
 import { AlertTriangle, X } from 'lucide-react';

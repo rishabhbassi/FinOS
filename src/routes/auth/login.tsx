@@ -53,10 +53,15 @@ function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Branding */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--lagoon-deep)] text-xl font-bold text-white shadow-lg">
-            F
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg">
+            <svg className="h-8 w-8" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="6" fill="#0d9488" />
+              <rect x="6" y="16" width="5" height="10" rx="1.5" fill="white" opacity="0.9" />
+              <rect x="13.5" y="10" width="5" height="16" rx="1.5" fill="white" opacity="0.95" />
+              <rect x="21" y="6" width="5" height="20" rx="1.5" fill="white" />
+            </svg>
           </div>
-          <h1 className="demo-title">Finance OS</h1>
+          <h1 className="demo-title">FinOS</h1>
           <p className="mt-1 text-sm text-[var(--sea-ink-soft)]">
             {isSignUp ? 'Create your account' : 'Sign in to your account'}
           </p>

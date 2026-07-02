@@ -1,4 +1,4 @@
-// Finance OS - Variable Budget Section
+// FinOS - Variable Budget Section
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertCircle, RefreshCw, Wallet, Plus, Trash2, X, Check } from 'lucide-react';

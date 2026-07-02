@@ -1,4 +1,4 @@
-// Finance OS - Transaction Form (React Hook Form + Zod)
+// FinOS - Transaction Form (React Hook Form + Zod)
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';

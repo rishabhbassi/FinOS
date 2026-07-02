@@ -1,4 +1,4 @@
-// Finance OS - Planner Summary
+// FinOS - Planner Summary
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { AlertCircle, RefreshCw } from 'lucide-react';

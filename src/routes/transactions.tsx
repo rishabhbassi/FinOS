@@ -1,4 +1,4 @@
-// Finance OS - Transactions Page
+// FinOS - Transactions Page
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { createFileRoute } from '@tanstack/react-router';

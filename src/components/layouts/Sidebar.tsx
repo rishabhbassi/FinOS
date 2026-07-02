@@ -1,4 +1,4 @@
-// Finance OS - Sidebar Navigation
+// FinOS - Sidebar Navigation
 
 import { Link, useLocation } from '@tanstack/react-router';
 import {
@@ -58,10 +58,13 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 hidden h-full w-[240px] flex-col border-r border-[var(--line)] bg-[var(--bg-base)] lg:flex">
       {/* Logo */}
       <div className="flex h-16 items-center gap-2.5 border-b border-[var(--line)] px-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--lagoon-deep)] text-xs font-bold text-white">
-          F
-        </div>
-        <span className="text-lg font-bold text-[var(--sea-ink)]">Finance OS</span>
+        <svg className="h-7 w-7" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="6" fill="#0d9488" />
+          <rect x="6" y="16" width="5" height="10" rx="1.5" fill="white" opacity="0.9" />
+          <rect x="13.5" y="10" width="5" height="16" rx="1.5" fill="white" opacity="0.95" />
+          <rect x="21" y="6" width="5" height="20" rx="1.5" fill="white" />
+        </svg>
+        <span className="text-lg font-bold text-[var(--sea-ink)]">FinOS</span>
       </div>
 
       {/* Navigation */}

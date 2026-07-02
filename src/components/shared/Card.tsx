@@ -1,4 +1,4 @@
-// Finance OS - Reusable Card Component
+// FinOS - Reusable Card Component
 
 import { type ReactNode } from 'react';
 import { cn } from '@/lib/utils';

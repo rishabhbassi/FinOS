@@ -1,4 +1,4 @@
-// Finance OS - Stat Card Component
+// FinOS - Stat Card Component
 
 import { type ReactNode } from 'react';
 import { TrendingUp } from 'lucide-react';

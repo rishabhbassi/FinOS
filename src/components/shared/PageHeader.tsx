@@ -1,4 +1,4 @@
-// Finance OS - Page Header Component
+// FinOS - Page Header Component
 
 import { type ReactNode } from 'react';
 

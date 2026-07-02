@@ -1,4 +1,4 @@
-// Finance OS - Loading Skeleton Component
+// FinOS - Loading Skeleton Component
 
 import { cn } from '@/lib/utils';
 

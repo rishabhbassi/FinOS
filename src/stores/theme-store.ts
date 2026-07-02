@@ -1,4 +1,4 @@
-// Finance OS - Theme Store (Zustand)
+// FinOS - Theme Store (Zustand)
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';

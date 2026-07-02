@@ -1,5 +1,5 @@
 {
-  "name": "finance-os",
+  "name": "finos",
   "private": true,
   "type": "module",
   "imports": {

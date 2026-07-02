@@ -1,4 +1,4 @@
-// Finance OS - Database Type Definitions
+// FinOS - Database Type Definitions
 // These match the Supabase schema exactly
 
 export interface Profile {

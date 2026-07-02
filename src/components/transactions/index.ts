@@ -1,4 +1,4 @@
-// Finance OS - Transaction Components Index
+// FinOS - Transaction Components Index
 
 export { default as QuickEntry } from './QuickEntry';
 export { default as TransactionForm } from './TransactionForm';

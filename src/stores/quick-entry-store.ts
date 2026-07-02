@@ -1,4 +1,4 @@
-// Finance OS - Quick Entry Store (Zustand)
+// FinOS - Quick Entry Store (Zustand)
 // Shared state so Quick Entry can be opened from any page
 
 import { create } from 'zustand';

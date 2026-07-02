@@ -1,4 +1,4 @@
-// Finance OS - Mobile Bottom Navigation
+// FinOS - Mobile Bottom Navigation
 
 import { Link, useLocation } from '@tanstack/react-router';
 import { LayoutDashboard, ArrowLeftRight, Wallet, CalendarCheck2, Settings } from 'lucide-react';

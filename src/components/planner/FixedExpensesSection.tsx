@@ -1,4 +1,4 @@
-// Finance OS - Fixed Expenses Section
+// FinOS - Fixed Expenses Section
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Trash2, AlertCircle, RefreshCw, Check, X, Wallet } from 'lucide-react';

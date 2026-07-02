@@ -1,4 +1,4 @@
-// Finance OS - Supabase Browser Client
+// FinOS - Supabase Browser Client
 // For client-side usage with TanStack Start
 
 import { createBrowserClient } from '@supabase/ssr';

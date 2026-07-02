@@ -1,4 +1,4 @@
-// Finance OS - Supabase CRUD Queries
+// FinOS - Supabase CRUD Queries
 // Centralized typed queries for all database operations
 
 import { supabase } from './client';

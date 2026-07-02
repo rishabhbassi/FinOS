@@ -1,4 +1,4 @@
-// Finance OS - The Budget Engine
+// FinOS - The Budget Engine
 // Core logic: calculates what you can spend at any given moment.
 // Everything revolves around remaining money, not money already spent.
 

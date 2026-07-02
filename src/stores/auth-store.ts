@@ -1,4 +1,4 @@
-// Finance OS - Auth Store (Zustand)
+// FinOS - Auth Store (Zustand)
 // Real Supabase Auth — replaces mock
 
 import { create } from 'zustand';

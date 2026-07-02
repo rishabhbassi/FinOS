@@ -1,4 +1,4 @@
-// Finance OS - Income Section
+// FinOS - Income Section
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Trash2, AlertCircle, RefreshCw, Wallet, X, Check } from 'lucide-react';

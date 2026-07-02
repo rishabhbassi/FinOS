@@ -1,4 +1,4 @@
-// Finance OS - Filter Bar for Transactions
+// FinOS - Filter Bar for Transactions
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {

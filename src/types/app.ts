@@ -1,4 +1,4 @@
-// Finance OS - Application Type Definitions
+// FinOS - Application Type Definitions
 
 export interface BudgetDay {
   date: string;

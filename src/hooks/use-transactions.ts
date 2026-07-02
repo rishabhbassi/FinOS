@@ -1,4 +1,4 @@
-// Finance OS - useTransactions Hook
+// FinOS - useTransactions Hook
 
 import { useState, useEffect, useCallback } from 'react';
 import type { Transaction } from '@/types/database';

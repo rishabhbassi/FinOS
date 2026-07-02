@@ -1,4 +1,4 @@
-// Finance OS - Quick Entry Modal (⌘K style)
+// FinOS - Quick Entry Modal (⌘K style)
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';

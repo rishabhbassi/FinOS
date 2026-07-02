@@ -1,4 +1,4 @@
-// Finance OS - Error Boundary Component
+// FinOS - Error Boundary Component
 
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';

@@ -1,4 +1,4 @@
-// Finance OS - Supabase Server Client
+// FinOS - Supabase Server Client
 // For server-side usage with TanStack Start
 // Pass request headers from route loaders / server functions
 
