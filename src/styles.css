@@ -5,6 +5,7 @@
 
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
 }
 
 :root {
@@ -447,6 +448,363 @@ a {
   background: color-mix(in oklab, var(--header-bg) 84%, transparent 16%);
 }
 
+/* ============================================ */
+/* Finance OS - Custom Utility Classes           */
+/* ============================================ */
+
+/* Page Layout */
+.fin-page {
+  width: min(1280px, calc(100% - 2rem));
+  margin-inline: auto;
+  padding-block: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.fin-page-narrow {
+  width: min(1080px, calc(100% - 2rem));
+}
+
+/* Card & Panel */
+.fin-card {
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: linear-gradient(165deg, var(--surface-strong), var(--surface));
+  box-shadow:
+    0 1px 0 var(--inset-glint) inset,
+    0 18px 34px rgba(30, 90, 72, 0.1),
+    0 4px 14px rgba(23, 58, 64, 0.06);
+  backdrop-filter: blur(4px);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.fin-card:hover {
+  border-color: color-mix(in oklab, var(--lagoon-deep) 35%, var(--line));
+}
+
+.fin-panel {
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: linear-gradient(165deg, var(--surface-strong), var(--surface));
+  box-shadow:
+    0 1px 0 var(--inset-glint) inset,
+    0 22px 44px rgba(30, 90, 72, 0.1),
+    0 6px 18px rgba(23, 58, 64, 0.08);
+  backdrop-filter: blur(4px);
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+/* Typography */
+.fin-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--sea-ink);
+  margin: 0;
+}
+
+.fin-title-lg {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.fin-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sea-ink);
+  margin: 0;
+}
+
+.fin-muted {
+  color: var(--sea-ink-soft);
+}
+
+.fin-kicker {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.69rem;
+  color: var(--kicker);
+}
+
+/* Sidebar */
+.fin-sidebar {
+  width: 240px;
+  min-height: 100vh;
+  border-right: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 60%, transparent);
+  backdrop-filter: blur(12px);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 0.75rem;
+}
+
+.fin-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  color: var(--sea-ink-soft);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.fin-sidebar-link:hover {
+  background: color-mix(in oklab, var(--lagoon) 10%, transparent);
+  color: var(--sea-ink);
+}
+
+.fin-sidebar-link.active {
+  background: color-mix(in oklab, var(--lagoon) 18%, var(--surface-strong));
+  color: var(--sea-ink);
+  font-weight: 600;
+}
+
+.fin-sidebar-link svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* Mobile Nav */
+.fin-mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  border-top: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 85%, transparent);
+  backdrop-filter: blur(16px);
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.fin-mobile-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.35rem 0.75rem;
+  color: var(--sea-ink-soft);
+  text-decoration: none;
+  font-size: 0.65rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: color 150ms ease;
+}
+
+.fin-mobile-nav-link.active {
+  color: var(--lagoon-deep);
+}
+
+.fin-mobile-nav-link svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Status Colors */
+.fin-status-comfortable { color: var(--palm, #2f6a4a); }
+.fin-status-tight { color: #b45309; }
+.fin-status-over { color: #dc2626; }
+
+.fin-bg-comfortable { background: color-mix(in oklab, #22c55e 12%, transparent); }
+.fin-bg-tight { background: color-mix(in oklab, #f59e0b 12%, transparent); }
+.fin-bg-over { background: color-mix(in oklab, #ef4444 12%, transparent); }
+
+/* Progress Bar */
+.fin-progress {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--line) 60%, transparent);
+  overflow: hidden;
+}
+
+.fin-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fin-progress-sm { height: 0.25rem; }
+.fin-progress-lg { height: 0.75rem; }
+
+/* Stat Display */
+.fin-stat-value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.fin-stat-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--sea-ink-soft);
+}
+
+/* Amount Colors */
+.fin-income { color: #16a34a; }
+.fin-expense { color: #dc2626; }
+
+/* Quick Entry Modal */
+.fin-quick-entry-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+}
+
+.fin-quick-entry-modal {
+  width: min(520px, calc(100% - 2rem));
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background: var(--surface-strong);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+  padding: 1.25rem;
+}
+
+/* Summary Bar */
+.fin-summary-bar {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--surface-strong) 80%, transparent);
+}
+
+.fin-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.fin-summary-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sea-ink-soft);
+}
+
+.fin-summary-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Data Table Overrides */
+.fin-table th {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sea-ink-soft);
+  border-bottom: 1px solid var(--line);
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+}
+
+.fin-table td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.fin-table tr:hover td {
+  background: color-mix(in oklab, var(--lagoon) 6%, transparent);
+}
+
+/* Filter */
+.fin-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--chip-bg, transparent);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--sea-ink-soft);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+
+.fin-filter-chip:hover,
+.fin-filter-chip.active {
+  border-color: var(--lagoon-deep);
+  background: color-mix(in oklab, var(--lagoon) 14%, transparent);
+  color: var(--sea-ink);
+}
+
+/* Skeleton Loader */
+.fin-skeleton {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--line) 40%, transparent) 25%,
+    color-mix(in oklab, var(--line) 70%, transparent) 50%,
+    color-mix(in oklab, var(--line) 40%, transparent) 75%
+  );
+  background-size: 200% 100%;
+  animation: fin-shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes fin-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Page transition */
+.fin-rise-in {
+  animation: fin-rise-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes fin-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Delay helpers for staggered children */
+.fin-delay-1 { animation-delay: 50ms; }
+.fin-delay-2 { animation-delay: 100ms; }
+.fin-delay-3 { animation-delay: 150ms; }
+.fin-delay-4 { animation-delay: 200ms; }
+.fin-delay-5 { animation-delay: 250ms; }
+
+/* Scrolling */
+.fin-scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+/* Numeric */
+.fin-number-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* === Preserve existing demo classes === */
 .rise-in {
   animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -460,5 +818,53 @@ a {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Budget Timeline Days */
+.fin-timeline-bar {
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--line) 50%, transparent);
+  position: relative;
+  overflow: hidden;
+  transition: all 300ms ease;
+}
+
+.fin-timeline-fill {
+  height: 100%;
+  border-radius: 0.5rem;
+  transition: width 800ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fin-timeline-spent {
+  background: linear-gradient(90deg, var(--lagoon-deep), var(--lagoon));
+}
+
+.fin-timeline-remaining {
+  background: color-mix(in oklab, var(--lagoon) 30%, transparent);
+}
+
+/* Goal Progress */
+.fin-goal-ring {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.fin-goal-ring svg {
+  transform: rotate(-90deg);
+}
+
+.fin-goal-ring-bg {
+  fill: none;
+  stroke: color-mix(in oklab, var(--line) 50%, transparent);
+  stroke-width: 4;
+}
+
+.fin-goal-ring-fill {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

@@ -124,3 +124,25 @@ export interface ReportData {
   monthlyTrend: { month: string; income: number; expenses: number; savings: number }[];
   netWorth: { month: string; value: number }[];
 }
+
+export interface TransactionFormData {
+  amount: number;
+  type: 'income' | 'expense' | 'transfer';
+  category_id: string;
+  account_id?: string;
+  description: string;
+  merchant: string;
+  date: string;
+  tags: string[];
+}
+
+export interface TransactionFilters {
+  dateFrom?: string;
+  dateTo?: string;
+  type?: 'income' | 'expense' | 'transfer';
+  category_id?: string;
+  account_id?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  search?: string;
+}
