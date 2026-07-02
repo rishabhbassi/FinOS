@@ -217,13 +217,20 @@ CREATE POLICY "Users view own snapshots"
 
 -- Auto-create profile on user signup
 CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   INSERT INTO profiles (id, full_name, avatar_url)
-  VALUES (NEW.id, NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'avatar_url');
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', 'User'),
+    NEW.raw_user_meta_data->>'avatar_url'
+  );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
@@ -231,7 +238,10 @@ CREATE TRIGGER on_auth_user_created
 
 -- Auto-create system categories for new users
 CREATE OR REPLACE FUNCTION create_default_categories()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   -- Income categories
   INSERT INTO categories (user_id, name, type, icon, color, is_system) VALUES
@@ -263,7 +273,7 @@ BEGIN
     (NEW.id, 'Misc', 'expense', 'more-horizontal', '#6b7280', true);
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER on_profile_created_categories
   AFTER INSERT ON profiles

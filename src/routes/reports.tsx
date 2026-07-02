@@ -256,4 +256,3 @@ function ReportsPage() {
 }
 
 export default ReportsPage;
-export { ReportsPage };

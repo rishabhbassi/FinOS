@@ -442,4 +442,3 @@ function applyThemeMode(mode: 'light' | 'dark' | 'auto') {
 }
 
 export default SettingsPage;
-export { SettingsPage };
