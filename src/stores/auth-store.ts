@@ -21,6 +21,25 @@ export interface AuthState {
   initialize: () => Promise<void>;
 }
 
+// Ensure a profile row exists for the user (handles DB flush where trigger can't re-fire)
+async function ensureProfile(userId: string, fullName: string) {
+  try {
+    const { count } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('id', userId);
+    if (count === 0) {
+      await supabase.from('profiles').insert({
+        id: userId,
+        full_name: fullName,
+        currency: 'INR',
+      });
+    }
+  } catch {
+    // Profile check failed — non-critical, queries will handle missing data
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -32,6 +51,10 @@ export const useAuthStore = create<AuthState>()(
         try {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user) {
+            await ensureProfile(
+              session.user.id,
+              session.user.user_metadata?.full_name ?? session.user.email ?? 'User',
+            );
             set({
               isAuthenticated: true,
               user: {
@@ -51,6 +74,10 @@ export const useAuthStore = create<AuthState>()(
         // Listen for auth changes
         supabase.auth.onAuthStateChange((_event, session) => {
           if (session?.user) {
+            ensureProfile(
+              session.user.id,
+              session.user.user_metadata?.full_name ?? session.user.email ?? 'User',
+            );
             set({
               isAuthenticated: true,
               user: {
@@ -72,6 +99,10 @@ export const useAuthStore = create<AuthState>()(
         });
         if (error) throw error;
         if (data.user) {
+          await ensureProfile(
+            data.user.id,
+            data.user.user_metadata?.full_name ?? email,
+          );
           set({
             isAuthenticated: true,
             user: {

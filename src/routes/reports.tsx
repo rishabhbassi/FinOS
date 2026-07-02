@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { BarChart3, RefreshCw, AlertCircle as AlertCircleIcon } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import type { Transaction } from '@/types/database';
 
 import ReportFilters, {
@@ -147,25 +147,6 @@ const DEFAULT_FILTERS: ReportFiltersState = {
 
 function ReportsPage() {
   const [filters, setFilters] = useState<ReportFiltersState>(DEFAULT_FILTERS);
-  const [simulateLoading, setSimulateLoading] = useState(false);
-  const [simulateError, setSimulateError] = useState<string | null>(null);
-
-  const handleGenerate = () => {
-    setSimulateLoading(true);
-    setSimulateError(null);
-
-    setTimeout(() => {
-      setSimulateLoading(false);
-    }, 600);
-  };
-
-  const toggleSimulateError = () => {
-    if (simulateError) {
-      setSimulateError(null);
-    } else {
-      setSimulateError('Failed to load report data. Please try again.');
-    }
-  };
 
   return (
     <main className="page-wrap px-4 pb-8 pt-14">
@@ -178,17 +159,6 @@ function ReportsPage() {
             Reports
           </h1>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={toggleSimulateError}
-            className="demo-button-secondary demo-button text-xs"
-            title="Toggle simulated error for testing"
-          >
-            <AlertCircleIcon className="h-3.5 w-3.5" />
-            Toggle Error
-          </button>
-        </div>
       </div>
 
       {/* Filters */}
@@ -196,60 +166,26 @@ function ReportsPage() {
         <ReportFilters
           filters={filters}
           onFiltersChange={setFilters}
-          onGenerate={handleGenerate}
+          onGenerate={() => {}}
         />
-      </div>
-
-      {/* Mobile Generate Button */}
-      <div className="mb-6 sm:hidden">
-        <button
-          type="button"
-          onClick={handleGenerate}
-          className="demo-button w-full justify-center"
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${simulateLoading ? 'animate-spin' : ''}`}
-          />
-          {simulateLoading ? 'Generating...' : 'Generate Report'}
-        </button>
       </div>
 
       {/* Charts Grid */}
       <div className="space-y-6">
         {/* Row 1: Income vs Expenses + Savings Trend */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <IncomeVsExpenseChart
-            data={MONTHLY_TREND}
-            loading={simulateLoading}
-            error={simulateError}
-          />
-          <SavingsTrendChart
-            data={SAVINGS_TREND}
-            loading={simulateLoading}
-            error={simulateError}
-          />
+          <IncomeVsExpenseChart data={MONTHLY_TREND} />
+          <SavingsTrendChart data={SAVINGS_TREND} />
         </div>
 
         {/* Row 2: Category Breakdown + Budget Utilization */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <CategoryBreakdownReport
-            data={CATEGORY_BREAKDOWN}
-            loading={simulateLoading}
-            error={simulateError}
-          />
-          <BudgetUtilizationReport
-            data={BUDGET_UTILIZATION}
-            loading={simulateLoading}
-            error={simulateError}
-          />
+          <CategoryBreakdownReport data={CATEGORY_BREAKDOWN} />
+          <BudgetUtilizationReport data={BUDGET_UTILIZATION} />
         </div>
 
         {/* Row 3: Top Expenses Table (full width) */}
-        <TopExpensesTable
-          data={TOP_EXPENSES}
-          loading={simulateLoading}
-          error={simulateError}
-        />
+        <TopExpensesTable data={TOP_EXPENSES} />
       </div>
     </main>
   );
