@@ -145,17 +145,9 @@ export default function QuickEntry({ open, onClose, onSuccess }: QuickEntryProps
     }
   }, [open, setValue]);
 
-  // Keyboard shortcut listener
+  // Keyboard shortcut: Escape closes
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        if (open) {
-          onClose();
-        } else {
-          onClose(); // toggle won't work here, parent controls open state
-        }
-      }
       if (e.key === 'Escape' && open) {
         onClose();
       }
