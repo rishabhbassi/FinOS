@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 import { HeadContent, Scripts, createRootRoute, useRouter } from '@tanstack/react-router';
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
-import { TanStackDevtools } from '@tanstack/react-devtools';
 import Sidebar from '@/components/layouts/Sidebar';
 import MobileNav from '@/components/layouts/MobileNav';
 import AuthGuard from '@/components/layouts/AuthGuard';
@@ -90,17 +88,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           onSuccess={handleQuickSuccess}
         />
 
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
         <Scripts />
       </body>
     </html>
