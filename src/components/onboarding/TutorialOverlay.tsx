@@ -227,37 +227,25 @@ export default function TutorialOverlay() {
   }, [show, measure]);
 
   // Calculate tooltip position relative to the spotlight
-  // Returns positioning + sizing; height is constrained so content never escapes the viewport
   const getTooltipStyle = (): React.CSSProperties => {
     const gap = 12;
     const safeW = winSize.w - gap * 2;
-    const safeH = winSize.h - gap * 2;
-
-    // Shared card content style — height-capped with scroll so mobile never clips
-    const cardContent: React.CSSProperties = {
-      maxHeight: safeH,
-      overflowY: 'auto',
-    };
 
     if (step.placement === 'center' || !spot) {
-      const isTallerThanView = safeH < 400;
       return {
         position: 'fixed',
         left: '50%',
-        ...(isTallerThanView
-          ? { top: gap, transform: 'translateX(-50%)' }
-          : { top: '50%', transform: 'translate(-50%, -50%)' }),
-        maxWidth: isMobile ? safeW : 440,
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        maxWidth: 440,
         width: safeW,
-        ...cardContent,
       };
     }
 
-    const tooltipW = isMobile ? safeW : Math.min(340, winSize.w - 32);
-    // tooltipH is a positioning reference — actual height is capped by safeH
-    const tooltipH = Math.min(240, winSize.h - 48);
+    const tooltipW = Math.min(340, winSize.w - 32);
+    const tooltipH = 240;
 
-    // On mobile, force bottom placement (unless target is near bottom, use top)
+    // On mobile, side placements fall back to bottom
     const effectivePlacement = (() => {
       if (!isMobile) return step.placement;
       if (step.placement === 'right' || step.placement === 'left') return 'bottom';
@@ -266,22 +254,15 @@ export default function TutorialOverlay() {
 
     const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, hi));
 
-    // Ensure tooltip is never taller than the safe area
-    const withCard = (base: React.CSSProperties): React.CSSProperties => ({
-      ...base,
-      ...cardContent,
-    });
-
     switch (effectivePlacement) {
       case 'right':
-        return withCard({
+        return {
           position: 'fixed',
           left: clamp(spot.left + spot.width + PADDING + TOOLTIP_GAP, gap, winSize.w - tooltipW - gap),
           top: clamp(spot.top + spot.height / 2 - tooltipH / 2, gap, winSize.h - tooltipH - gap),
           width: tooltipW,
-        });
+        };
       case 'bottom': {
-        // If target is in the bottom 65% of screen, show tooltip above instead
         const prefersTop = spot.top + spot.height > winSize.h * 0.65;
         const topPos = prefersTop
           ? clamp(spot.top - tooltipH - TOOLTIP_GAP, gap, winSize.h - tooltipH - gap)
@@ -289,35 +270,155 @@ export default function TutorialOverlay() {
         const leftPos = isMobile
           ? gap
           : clamp(spot.left + spot.width / 2 - tooltipW / 2, gap, winSize.w - tooltipW - gap);
-        return withCard({
+        return {
           position: 'fixed',
           left: leftPos,
           top: topPos,
           width: isMobile ? safeW : tooltipW,
-        });
+        };
       }
       case 'left':
-        return withCard({
+        return {
           position: 'fixed',
           left: clamp(spot.left - tooltipW - TOOLTIP_GAP, gap, winSize.w - tooltipW - gap),
           top: clamp(spot.top + spot.height / 2 - tooltipH / 2, gap, winSize.h - tooltipH - gap),
           width: tooltipW,
-        });
+        };
       default:
-        return withCard({
+        return {
           position: 'fixed',
           left: clamp(spot.left + spot.width / 2 - tooltipW / 2, gap, winSize.w - tooltipW - gap),
           top: spot.top + spot.height + PADDING + TOOLTIP_GAP,
           width: tooltipW,
-        });
+        };
     }
   };
 
   if (!show || winSize.w === 0) return null;
 
+  // ── Mobile layout: full-width bottom sheet ────────────────────────────────
+  if (isMobile) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          className="fixed inset-0 z-[200]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="absolute inset-0 bg-black/60" onClick={complete} />
+
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 z-20"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div
+              className="mx-auto w-full max-w-lg rounded-t-2xl border border-b-0 border-[var(--line)] bg-[var(--bg-base)] px-5 pb-8 pt-5 shadow-xl"
+              style={{ maxHeight: 'min(80vh, 520px)' }}
+            >
+              {/* Scrollable content area */}
+              <div className="overflow-y-auto" style={{ maxHeight: 'inherit' }}>
+                {/* Step indicator */}
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex gap-1.5">
+                    {Array.from({ length: totalSteps }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          i === currentStep
+                            ? 'w-6 bg-[var(--lagoon)]'
+                            : i < currentStep
+                              ? 'w-1.5 bg-[var(--lagoon-deep)]'
+                              : 'w-1.5 bg-[var(--line)]'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={complete}
+                    className="text-xs font-medium text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)] transition-colors"
+                  >
+                    Skip
+                  </button>
+                </div>
+
+                {/* Icon */}
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--lagoon-deep)] text-white">
+                  <step.icon className="h-5 w-5" />
+                </div>
+
+                {/* Title */}
+                <h3 className="mb-1.5 text-lg font-bold text-[var(--sea-ink)]">
+                  {step.title}
+                </h3>
+
+                {/* Description */}
+                <p className="mb-3 text-sm leading-relaxed text-[var(--sea-ink-soft)]">
+                  {step.description}
+                </p>
+
+                {/* Tip */}
+                <div className="mb-4 rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
+                  <p className="text-xs text-[var(--sea-ink-soft)]">
+                    <span className="font-semibold text-[var(--lagoon-deep)]">
+                      💡 Tip:{' '}
+                    </span>
+                    {step.tip}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={prev}
+                    disabled={isFirst}
+                    className={`flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                      isFirst
+                        ? 'opacity-0 pointer-events-none'
+                        : 'text-[var(--sea-ink-soft)] hover:text-[var(--sea-ink)] hover:bg-[var(--surface)]'
+                    }`}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Back
+                  </button>
+
+                  {isLast ? (
+                    <button
+                      type="button"
+                      onClick={complete}
+                      className="flex items-center gap-1.5 rounded-lg bg-[var(--lagoon-deep)] px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+                    >
+                      <Check className="h-4 w-4" />
+                      Finish Tour
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={next}
+                      className="flex items-center gap-1.5 rounded-lg bg-[var(--lagoon-deep)] px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+                    >
+                      Next
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  // ── Desktop layout: positioned tooltip near target ─────────────────────────
   return (
     <AnimatePresence>
-      {/* Fullscreen dark overlay */}
       <motion.div
         className="fixed inset-0 z-[200]"
         initial={{ opacity: 0 }}
