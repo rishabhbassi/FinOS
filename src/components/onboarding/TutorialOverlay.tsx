@@ -191,6 +191,7 @@ function getTargetSpot(selector: string): Spot | null {
 
 const PADDING = 14;
 const TOOLTIP_GAP = 16;
+const MOBILE_BREAKPOINT = 640;
 
 export default function TutorialOverlay() {
   const { show, currentStep, totalSteps, complete, next, prev } = useOnboarding();
@@ -202,6 +203,7 @@ export default function TutorialOverlay() {
   const step = STEPS[currentStep] ?? STEPS[0];
   const isFirst = currentStep === 0;
   const isLast = currentStep === totalSteps - 1;
+  const isMobile = winSize.w < MOBILE_BREAKPOINT;
 
   // Measure target element position
   const measure = useCallback(() => {
@@ -226,46 +228,67 @@ export default function TutorialOverlay() {
 
   // Calculate tooltip position relative to the spotlight
   const getTooltipStyle = (): React.CSSProperties => {
+    const gap = 12;
+    const safeW = winSize.w - gap * 2;
+
     if (step.placement === 'center' || !spot) {
       return {
         position: 'fixed',
         left: '50%',
         top: '50%',
         transform: 'translate(-50%, -50%)',
-        maxWidth: 440,
-        width: 'calc(100% - 32px)',
+        maxWidth: isMobile ? safeW : 440,
+        width: safeW,
       };
     }
 
-    const tooltipW = 340;
+    const tooltipW = isMobile ? safeW : Math.min(340, winSize.w - 32);
     const tooltipH = 240;
 
-    switch (step.placement) {
+    // On mobile, force bottom placement (unless target is near bottom, use top)
+    const effectivePlacement = (() => {
+      if (!isMobile) return step.placement;
+      if (step.placement === 'right' || step.placement === 'left') return 'bottom';
+      return step.placement;
+    })();
+
+    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, hi));
+
+    switch (effectivePlacement) {
       case 'right':
         return {
           position: 'fixed',
-          left: Math.min(spot.left + spot.width + PADDING + TOOLTIP_GAP, winSize.w - tooltipW - 16),
-          top: Math.max(16, Math.min(spot.top + spot.height / 2 - tooltipH / 2, winSize.h - tooltipH - 16)),
+          left: clamp(spot.left + spot.width + PADDING + TOOLTIP_GAP, gap, winSize.w - tooltipW - gap),
+          top: clamp(spot.top + spot.height / 2 - tooltipH / 2, gap, winSize.h - tooltipH - gap),
           width: tooltipW,
         };
-      case 'bottom':
+      case 'bottom': {
+        // If target is in the bottom 65% of screen, show tooltip above instead
+        const prefersTop = spot.top + spot.height > winSize.h * 0.65;
+        const topPos = prefersTop
+          ? clamp(spot.top - tooltipH - TOOLTIP_GAP, gap, winSize.h - tooltipH - gap)
+          : clamp(spot.top + spot.height + PADDING + TOOLTIP_GAP, gap, winSize.h - tooltipH - gap);
+        const leftPos = isMobile
+          ? gap
+          : clamp(spot.left + spot.width / 2 - tooltipW / 2, gap, winSize.w - tooltipW - gap);
         return {
           position: 'fixed',
-          left: Math.max(16, Math.min(spot.left + spot.width / 2 - tooltipW / 2, winSize.w - tooltipW - 16)),
-          top: Math.min(spot.top + spot.height + PADDING + TOOLTIP_GAP, winSize.h - tooltipH - 16),
-          width: tooltipW,
+          left: leftPos,
+          top: topPos,
+          width: isMobile ? safeW : tooltipW,
         };
+      }
       case 'left':
         return {
           position: 'fixed',
-          left: Math.max(16, spot.left - tooltipW - TOOLTIP_GAP),
-          top: Math.max(16, Math.min(spot.top + spot.height / 2 - tooltipH / 2, winSize.h - tooltipH - 16)),
+          left: clamp(spot.left - tooltipW - TOOLTIP_GAP, gap, winSize.w - tooltipW - gap),
+          top: clamp(spot.top + spot.height / 2 - tooltipH / 2, gap, winSize.h - tooltipH - gap),
           width: tooltipW,
         };
       default:
         return {
           position: 'fixed',
-          left: Math.max(16, spot.left + spot.width / 2 - tooltipW / 2),
+          left: clamp(spot.left + spot.width / 2 - tooltipW / 2, gap, winSize.w - tooltipW - gap),
           top: spot.top + spot.height + PADDING + TOOLTIP_GAP,
           width: tooltipW,
         };
