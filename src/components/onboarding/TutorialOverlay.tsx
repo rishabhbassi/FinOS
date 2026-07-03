@@ -227,23 +227,35 @@ export default function TutorialOverlay() {
   }, [show, measure]);
 
   // Calculate tooltip position relative to the spotlight
+  // Returns positioning + sizing; height is constrained so content never escapes the viewport
   const getTooltipStyle = (): React.CSSProperties => {
     const gap = 12;
     const safeW = winSize.w - gap * 2;
+    const safeH = winSize.h - gap * 2;
+
+    // Shared card content style — height-capped with scroll so mobile never clips
+    const cardContent: React.CSSProperties = {
+      maxHeight: safeH,
+      overflowY: 'auto',
+    };
 
     if (step.placement === 'center' || !spot) {
+      const isTallerThanView = safeH < 400;
       return {
         position: 'fixed',
         left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
+        ...(isTallerThanView
+          ? { top: gap, transform: 'translateX(-50%)' }
+          : { top: '50%', transform: 'translate(-50%, -50%)' }),
         maxWidth: isMobile ? safeW : 440,
         width: safeW,
+        ...cardContent,
       };
     }
 
     const tooltipW = isMobile ? safeW : Math.min(340, winSize.w - 32);
-    const tooltipH = 240;
+    // tooltipH is a positioning reference — actual height is capped by safeH
+    const tooltipH = Math.min(240, winSize.h - 48);
 
     // On mobile, force bottom placement (unless target is near bottom, use top)
     const effectivePlacement = (() => {
@@ -254,14 +266,20 @@ export default function TutorialOverlay() {
 
     const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(v, hi));
 
+    // Ensure tooltip is never taller than the safe area
+    const withCard = (base: React.CSSProperties): React.CSSProperties => ({
+      ...base,
+      ...cardContent,
+    });
+
     switch (effectivePlacement) {
       case 'right':
-        return {
+        return withCard({
           position: 'fixed',
           left: clamp(spot.left + spot.width + PADDING + TOOLTIP_GAP, gap, winSize.w - tooltipW - gap),
           top: clamp(spot.top + spot.height / 2 - tooltipH / 2, gap, winSize.h - tooltipH - gap),
           width: tooltipW,
-        };
+        });
       case 'bottom': {
         // If target is in the bottom 65% of screen, show tooltip above instead
         const prefersTop = spot.top + spot.height > winSize.h * 0.65;
@@ -271,27 +289,27 @@ export default function TutorialOverlay() {
         const leftPos = isMobile
           ? gap
           : clamp(spot.left + spot.width / 2 - tooltipW / 2, gap, winSize.w - tooltipW - gap);
-        return {
+        return withCard({
           position: 'fixed',
           left: leftPos,
           top: topPos,
           width: isMobile ? safeW : tooltipW,
-        };
+        });
       }
       case 'left':
-        return {
+        return withCard({
           position: 'fixed',
           left: clamp(spot.left - tooltipW - TOOLTIP_GAP, gap, winSize.w - tooltipW - gap),
           top: clamp(spot.top + spot.height / 2 - tooltipH / 2, gap, winSize.h - tooltipH - gap),
           width: tooltipW,
-        };
+        });
       default:
-        return {
+        return withCard({
           position: 'fixed',
           left: clamp(spot.left + spot.width / 2 - tooltipW / 2, gap, winSize.w - tooltipW - gap),
           top: spot.top + spot.height + PADDING + TOOLTIP_GAP,
           width: tooltipW,
-        };
+        });
     }
   };
 
