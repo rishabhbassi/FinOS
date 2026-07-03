@@ -313,7 +313,7 @@ export default function TutorialOverlay() {
     }
   };
 
-  if (!show) return null;
+  if (!show || winSize.w === 0) return null;
 
   return (
     <AnimatePresence>
